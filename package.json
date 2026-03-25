@@ -1,0 +1,24 @@
+{
+  "name": "lahore-boys-hostels",
+  "version": "1.0.0",
+  "description": "Lahore Boys Hostels - Complete hostel directory and management platform",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server",
+    "start": "npx http-server"
+  },
+  "keywords": [
+    "hostel",
+    "lahore",
+    "accommodation",
+    "boys",
+    "directory"
+  ],
+  "author": "Awais Rehman",
+  "email": "awaisrehman936@gmail.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awaisrehman936/lahore-boys-hostels.git"
+  }
+}
