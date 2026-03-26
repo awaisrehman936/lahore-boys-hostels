@@ -20,5 +20,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/awaisrehman936/lahore-boys-hostels.git"
+  },
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
   }
 }
