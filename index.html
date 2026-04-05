@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -233,80 +235,35 @@
 
   <!-- Login Screen -->
   <div id="l-wrap" style="background:#0E1117;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
-    <div style="width:100%;max-width:440px">
+    <div style="width:100%;max-width:420px">
+
       <div style="text-align:center;margin-bottom:32px">
-        <div style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:#E8EDF5">Lahore<span style="color:#E8B84B">Boys</span>Hostels</div>
-        <div style="color:#6B7A99;font-size:.83rem;margin-top:4px">Management Portal</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:#E8EDF5">Lahore<span style="color:#E8B84B">Boys</span>Hostels</div>
+        <div style="color:#6B7A99;font-size:.83rem;margin-top:4px;letter-spacing:.04em">Management Portal</div>
       </div>
 
-      <div class="l-tabs" style="grid-template-columns:repeat(5,1fr)">
-        <button class="l-tab active" id="lt-manager" onclick="mLog('manager')">Manager</button>
-        <button class="l-tab" id="lt-hostelite" onclick="mLog('hostelite')">Tenant</button>
-        <button class="l-tab" id="lt-staff" onclick="mLog('staff')">Staff</button>
-        <button class="l-tab" id="lt-finance" onclick="mLog('finance')">Finance</button>
-        <button class="l-tab" id="lt-admin" onclick="mLog('admin')">Admin</button>
-      </div>
+      <div style="background:#161B26;border:1px solid #2A3347;border-radius:12px;padding:28px">
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:20px">Sign In to Your Portal</div>
 
-      <!-- Manager Login -->
-      <div id="lf-manager" class="l-form" style="background:#161B26;border:1px solid #2A3347;border-radius:10px;padding:24px">
-        <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:16px">Manager Login</div>
-        <div style="margin-bottom:12px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Username</label>
-          <input class="mfi" id="l-muser" placeholder="manager.ar" onkeydown="if(event.key==='Enter')loginM()"></div>
-        <div style="margin-bottom:16px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Password</label>
-          <input class="mfi" id="l-mpass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginM()"></div>
-        <button class="mb mb-gold" style="width:100%;justify-content:center" onclick="loginM()">Login as Manager</button>
-        <div id="l-demo" style="margin-top:14px;padding:10px;background:#1E2636;border-radius:6px;font-size:.75rem;color:#6B7A99">
-          <div style="color:#E8B84B;font-weight:600;margin-bottom:4px">Demo credentials:</div>
-          <div>Username: <code style="color:#E8EDF5">manager.ar</code></div>
-          <div>Password: <code style="color:#E8EDF5">ar2024</code></div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Email</label>
+          <input class="mfi" id="l-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')portalLogin()">
         </div>
-        <button class="portal-back-btn" onclick="closePortal()">← Back to Hostel Directory</button>
+        <div style="margin-bottom:20px">
+          <label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Password</label>
+          <input class="mfi" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')portalLogin()">
+        </div>
+
+        <button class="mb mb-gold" id="l-btn" style="width:100%;justify-content:center" onclick="portalLogin()">Sign In</button>
+
+        <div id="l-err" style="display:none;margin-top:12px;padding:10px;background:#2A1A1A;border:1px solid #5A2020;border-radius:6px;font-size:.8rem;color:#E88080"></div>
+
+        <div style="margin-top:16px;text-align:center">
+          <a onclick="showForgotPassword()" style="font-size:.78rem;color:#6B7A99;cursor:pointer;text-decoration:underline">Forgot password?</a>
+        </div>
       </div>
 
-      <!-- Hostelite Login -->
-      <div id="lf-hostelite" class="l-form" style="display:none;background:#161B26;border:1px solid #2A3347;border-radius:10px;padding:24px">
-        <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:16px">Tenant Login</div>
-        <div style="margin-bottom:12px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Tenant ID</label>
-          <input class="mfi" id="l-huser" placeholder="ARH-001" onkeydown="if(event.key==='Enter')loginH()"></div>
-        <div style="margin-bottom:16px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Password (CNIC / TID)</label>
-          <input class="mfi" id="l-hpass" type="password" placeholder="Your CNIC or TID" onkeydown="if(event.key==='Enter')loginH()"></div>
-        <button class="mb mb-gold" style="width:100%;justify-content:center" onclick="loginH()">Login as Tenant</button>
-        <button class="portal-back-btn" onclick="closePortal()">← Back to Hostel Directory</button>
-      </div>
-
-      <!-- Staff Login -->
-      <div id="lf-staff" class="l-form" style="display:none;background:#161B26;border:1px solid #2A3347;border-radius:10px;padding:24px">
-        <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:16px">Staff Login</div>
-        <div style="margin-bottom:12px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Staff Name / Username</label>
-          <input class="mfi" id="l-suser" placeholder="Your name" onkeydown="if(event.key==='Enter')loginS()"></div>
-        <div style="margin-bottom:16px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Password</label>
-          <input class="mfi" id="l-spass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginS()"></div>
-        <button class="mb mb-gold" style="width:100%;justify-content:center" onclick="loginS()">Login as Staff</button>
-        <button class="portal-back-btn" onclick="closePortal()">← Back to Hostel Directory</button>
-      </div>
-
-      <!-- Finance Login -->
-      <div id="lf-finance" class="l-form" style="display:none;background:#161B26;border:1px solid #2A3347;border-radius:10px;padding:24px">
-        <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:16px">Finance Login</div>
-        <div style="margin-bottom:12px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Username</label>
-          <input class="mfi" id="l-fuser" placeholder="finance.lbh" onkeydown="if(event.key==='Enter')loginF()"></div>
-        <div style="margin-bottom:16px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Password</label>
-          <input class="mfi" id="l-fpass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginF()"></div>
-        <button class="mb mb-gold" style="width:100%;justify-content:center" onclick="loginF()">Login as Finance</button>
-        <button class="portal-back-btn" onclick="closePortal()">← Back to Hostel Directory</button>
-      </div>
-
-      <!-- Admin Login -->
-      <div id="lf-admin" class="l-form" style="display:none;background:#161B26;border:1px solid #2A3347;border-radius:10px;padding:24px">
-        <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:16px">Administrator Login</div>
-        <div style="margin-bottom:12px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Username</label>
-          <input class="mfi" id="l-auser" placeholder="admin.lbh" onkeydown="if(event.key==='Enter')loginA()"></div>
-        <div style="margin-bottom:16px"><label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Password</label>
-          <input class="mfi" id="l-apass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginA()"></div>
-        <button class="mb mb-gold" style="width:100%;justify-content:center" onclick="loginA()">Login as Admin</button>
-        <button class="portal-back-btn" onclick="closePortal()">← Back to Hostel Directory</button>
-      </div>
-
+      <button class="portal-back-btn" onclick="closePortal()">← Back to Hostel Directory</button>
     </div>
   </div>
 
@@ -318,6 +275,9 @@
 
 </div><!-- /page-portal -->
 
+<!-- Load order: config → supabase client → app logic -->
+<script src="config.js"></script>
+<script src="supabase-client.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
