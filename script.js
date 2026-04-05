@@ -21,17 +21,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ─── THEME ──────────────────────────────────────────────────
-function toggleTheme() {
-  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+const THEMES = ['white','charcoal','midnight','aqua','honey'];
+
+function setTheme(t) {
+  if (!THEMES.includes(t)) t = 'white';
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('lbh_theme', t);
-  document.querySelector('.theme-toggle').textContent = t === 'dark' ? '☀' : '☽';
+  document.querySelectorAll('.tp-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.theme === t);
+  });
 }
+
 function loadTheme() {
-  const t = localStorage.getItem('lbh_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
-  const btn = document.querySelector('.theme-toggle');
-  if (btn) btn.textContent = t === 'dark' ? '☀' : '☽';
+  const t = localStorage.getItem('lbh_theme') || 'white';
+  setTheme(t);
 }
 
 // ─── PAGE NAVIGATION ─────────────────────────────────────────
@@ -180,14 +183,14 @@ function updateHeroStats() {
   const total = allHostels.length;
   const beds  = allHostels.reduce((s, h) => s + (h.total_capacity || 0), 0);
   const minP  = allHostels.reduce((m, h) => Math.min(m, h.price_from || 99999), 99999);
-  const stats = document.querySelectorAll('.hstat-num');
-  if (stats[0]) stats[0].textContent = total;
-  if (stats[1]) stats[1].textContent = beds > 0 ? beds + '+' : '—';
-  if (stats[2]) stats[2].textContent = minP < 99999 ? 'Rs. ' + _fmt(minP) : '—';
+  const el = id => document.getElementById(id);
+  if (el('stat-hostels')) el('stat-hostels').textContent = total;
+  if (el('stat-beds'))    el('stat-beds').textContent    = beds > 0 ? beds + '+' : '—';
+  if (el('stat-price'))   el('stat-price').textContent   = minP < 99999 ? 'Rs. ' + _fmt(minP) : '—';
 }
 
 function filterHostels() {
-  const search = (document.querySelector('.hero-search input')?.value || '').toLowerCase();
+  const search = (document.getElementById('hero-search-input')?.value || '').toLowerCase();
   const area   = document.getElementById('fsel-area')?.value || 'all';
   const sort   = document.getElementById('fsel-sort')?.value || 'default';
 
@@ -231,6 +234,18 @@ function setViewMode(m) {
   if (grid) { grid.classList.toggle('hgrid-list', m === 'list'); }
 }
 
+// Generate a consistent photo URL for a hostel using picsum (free, no API key)
+function hostelPhoto(h) {
+  if (h.cover_image_url) {
+    return `<img src="${h.cover_image_url}" alt="${h.name}" style="width:100%;height:100%;object-fit:cover">`;
+  }
+  const seed = encodeURIComponent((h.prefix || h.name.slice(0,6)).replace(/\s/g,'-'));
+  return `<img src="https://picsum.photos/seed/${seed}/600/300"
+    alt="${h.name}" loading="lazy"
+    style="width:100%;height:100%;object-fit:cover"
+    onerror="this.parentElement.innerHTML='<div class=hcard-img-fallback>🏢</div>'">`;
+}
+
 function renderHostelCards(list) {
   const grid = document.getElementById('hgrid');
   if (!grid) return;
@@ -239,13 +254,15 @@ function renderHostelCards(list) {
     return;
   }
   grid.innerHTML = list.map(h => {
-    const inCompare = compareList.includes(h.id);
+    const inCompare  = compareList.includes(h.id);
     const amenityTags = (h.amenities || []).slice(0, 4).map(a =>
       `<span class="htag">${a}</span>`).join('');
+    const safeName = h.name.replace(/'/g, "\\'");
     return `
     <div class="hcard ${inCompare ? 'hcard-selected' : ''}" data-id="${h.id}">
-      <div class="hcard-img" style="background:var(--cream2);display:flex;align-items:center;justify-content:center;height:160px;font-size:2.5rem">
-        ${h.cover_image_url ? `<img src="${h.cover_image_url}" style="width:100%;height:100%;object-fit:cover">` : '🏢'}
+      <div class="hcard-img">
+        ${hostelPhoto(h)}
+        <span class="hcard-badge">Verified</span>
       </div>
       <div class="hcard-body">
         <div class="hcard-top">
@@ -257,10 +274,10 @@ function renderHostelCards(list) {
           <span class="hp-mo">/month</span>
         </div>
         <div class="hcard-tags">${amenityTags}</div>
-        ${h.rating ? `<div class="hcard-rating">${stars(h.rating)} <span style="font-size:.78rem;color:var(--muted)">${h.rating}</span></div>` : ''}
+        ${h.rating ? `<div class="hcard-rating">${stars(h.rating)} <small style="color:var(--muted)">${h.rating}</small></div>` : ''}
         <div class="hcard-actions">
-          <button class="hc-btn hc-apply" onclick="openApply('${h.id}','${h.name.replace(/'/g,"\\'")}')">Apply Now</button>
-          ${h.website_url ? `<a class="hc-btn hc-visit" href="${h.website_url}" target="_blank" rel="noopener">Visit Website ↗</a>` : ''}
+          <button class="hc-btn hc-apply" onclick="openApply('${h.id}','${safeName}')">Apply Now</button>
+          ${h.website_url ? `<a class="hc-btn hc-visit" href="${h.website_url}" target="_blank" rel="noopener">Website ↗</a>` : ''}
           <button class="hc-btn hc-cmp ${inCompare ? 'hc-cmp-active' : ''}"
             onclick="toggleCompare('${h.id}',this)">
             ${inCompare ? '✓ Comparing' : '+ Compare'}
@@ -293,16 +310,21 @@ function updateCompareBar() {
   const inlineBar = document.getElementById('inline-compare-bar');
   if (!compareList.length) {
     if (bar) bar.style.display = 'none';
-    if (inlineBar) inlineBar.style.display = 'none';
+    if (inlineBar) inlineBar.classList.remove('visible');
     return;
   }
   if (bar) bar.style.display = 'flex';
-  if (inlineBar) inlineBar.style.display = 'flex';
+  if (inlineBar) inlineBar.classList.add('visible');
   const slots = document.getElementById('cmp-slots');
   if (slots) slots.innerHTML = compareList.map(id => {
     const h = allHostels.find(x => x.id === id);
     return `<div class="cslot">${h?.name || id} <span onclick="toggleCompare('${id}',null)" style="cursor:pointer;margin-left:4px">✕</span></div>`;
   }).join('') + Array(3 - compareList.length).fill('<div class="cslot empty">+ Add hostel</div>').join('');
+  const iSlots = document.getElementById('inline-compare-slots');
+  if (iSlots) iSlots.innerHTML = compareList.map(id => {
+    const h = allHostels.find(x => x.id === id);
+    return `<span class="cislot">${h?.name?.split(' ')[0] || '…'}</span>`;
+  }).join('') + Array(3 - compareList.length).fill('<span class="cislot empty">+</span>').join('');
 }
 
 function clearCompare() {

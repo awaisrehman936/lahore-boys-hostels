@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="white">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +7,8 @@
 <meta name="description" content="Discover verified boys hostels in Lahore. Compare prices, amenities and locations. Apply online.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<!-- Supabase JS SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -23,8 +22,15 @@
     <li><a onclick="openPortal()" class="nav-portal">Portal Login</a></li>
     <li><a onclick="showPage('home');smoothScroll('#hostels')" class="nav-cta">Find Rooms</a></li>
   </ul>
-  <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
-    <button class="theme-toggle" onclick="toggleTheme()">☽</button>
+  <div class="nav-right">
+    <!-- 5-Theme Picker -->
+    <div class="theme-picker" title="Switch theme">
+      <div class="tp-dot tp-white    active" data-theme="white"    onclick="setTheme('white')"    title="White"></div>
+      <div class="tp-dot tp-charcoal"        data-theme="charcoal" onclick="setTheme('charcoal')" title="Charcoal"></div>
+      <div class="tp-dot tp-midnight"        data-theme="midnight" onclick="setTheme('midnight')" title="Midnight Purple"></div>
+      <div class="tp-dot tp-aqua"            data-theme="aqua"     onclick="setTheme('aqua')"     title="Aqua Teal"></div>
+      <div class="tp-dot tp-honey"           data-theme="honey"    onclick="setTheme('honey')"    title="Warm Honey"></div>
+    </div>
     <button id="nav-portal-close" onclick="closePortal()">✕ Exit Portal</button>
   </div>
 </nav>
@@ -39,7 +45,7 @@
       <h1>Find Your<br><em>Perfect</em> Hostel<br>in Lahore</h1>
       <p class="hero-sub">Compare verified boys hostels across Lahore. Transparent pricing, real amenities, trusted management.</p>
       <div class="hero-search">
-        <input type="text" placeholder="Search by area, name or budget..." oninput="document.getElementById('fsel-area').value='all';filterHostels()">
+        <input type="text" id="hero-search-input" placeholder="Search by area, name or budget…" oninput="filterHostels()">
         <select id="hero-area" onchange="document.getElementById('fsel-area').value=this.value;filterHostels()">
           <option value="all">All Areas</option>
           <option value="Nasir Colony">Nasir Colony</option>
@@ -56,9 +62,9 @@
         <button onclick="filterHostels()">Search →</button>
       </div>
       <div class="hero-stats">
-        <div><div class="hstat-num">12</div><div class="hstat-lbl">Verified Hostels</div></div>
-        <div><div class="hstat-num">500+</div><div class="hstat-lbl">Beds Available</div></div>
-        <div><div class="hstat-num">Rs. 5K</div><div class="hstat-lbl">Starting From</div></div>
+        <div><div class="hstat-num" id="stat-hostels">—</div><div class="hstat-lbl">Verified Hostels</div></div>
+        <div><div class="hstat-num" id="stat-beds">—</div><div class="hstat-lbl">Beds Available</div></div>
+        <div><div class="hstat-num" id="stat-price">—</div><div class="hstat-lbl">Starting From</div></div>
         <div><div class="hstat-num">100%</div><div class="hstat-lbl">Verified Owners</div></div>
       </div>
     </div>
@@ -68,15 +74,15 @@
   <section id="hostels">
     <div class="stag">Our Network</div>
     <div class="stitle">Browse Verified Hostels</div>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.5rem">All listings are personally verified. Prices shown are per person per month.</p>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem">All listings are personally verified. Prices shown are per person per month.</p>
 
     <div class="filters-bar">
       <span class="fl">Filter:</span>
-      <button class="fb active" id="fb-all" onclick="setF('all')">All</button>
-      <button class="fb" id="fb-student" onclick="setF('student')">Students</button>
-      <button class="fb" id="fb-pro" onclick="setF('pro')">Professionals</button>
-      <button class="fb" id="fb-meals" onclick="setF('meals')">Meals Included</button>
-      <button class="fb" id="fb-wifi" onclick="setF('wifi')">WiFi</button>
+      <button class="fb active" id="fb-all"     onclick="setF('all')">All</button>
+      <button class="fb"        id="fb-student"  onclick="setF('student')">Students</button>
+      <button class="fb"        id="fb-pro"      onclick="setF('pro')">Professionals</button>
+      <button class="fb"        id="fb-meals"    onclick="setF('meals')">Meals Included</button>
+      <button class="fb"        id="fb-wifi"     onclick="setF('wifi')">WiFi</button>
       <select class="fsel" id="fsel-area" onchange="filterHostels()">
         <option value="all">All Areas</option>
         <option value="Nasir Colony">Nasir Colony</option>
@@ -98,7 +104,7 @@
         <option value="price-desc">Price: High to Low</option>
         <option value="rating">Rating</option>
       </select>
-      <span class="rc" id="result-count">12 hostels found</span>
+      <span class="rc" id="result-count"></span>
       <!-- Inline compare bar -->
       <div class="compare-inline" id="inline-compare-bar">
         <span class="compare-inline-label">▶ Compare:</span>
@@ -107,8 +113,8 @@
         <button class="compare-inline-clr" onclick="clearCompare()">✕</button>
       </div>
       <div class="view-toggle">
-        <button class="vt-btn active" id="vt-grid" onclick="setViewMode('grid')">⊞</button>
-        <button class="vt-btn" id="vt-list" onclick="setViewMode('list')">☰</button>
+        <button class="vt-btn active" id="vt-grid" onclick="setViewMode('grid')" title="Grid view">⊞</button>
+        <button class="vt-btn"        id="vt-list" onclick="setViewMode('list')" title="List view">☰</button>
       </div>
     </div>
 
@@ -116,14 +122,30 @@
   </section>
 
   <!-- How It Works -->
-  <section id="how" style="background:var(--cream2)">
+  <section id="how">
     <div class="stag">Simple Process</div>
     <div class="stitle">How It Works</div>
     <div class="steps-grid">
-      <div class="sitem"><div class="snum">1</div><div class="stitl">Browse</div><div class="sdesc">Explore verified hostels with transparent pricing and real photos.</div></div>
-      <div class="sitem"><div class="snum">2</div><div class="stitl">Compare</div><div class="sdesc">Select up to 3 hostels and compare side by side.</div></div>
-      <div class="sitem"><div class="snum">3</div><div class="stitl">Apply</div><div class="sdesc">Fill in a quick form and we'll connect you with the manager.</div></div>
-      <div class="sitem"><div class="snum">4</div><div class="stitl">Move In</div><div class="sdesc">Confirm your room and move in at your preferred date.</div></div>
+      <div class="sitem">
+        <div class="snum">1</div>
+        <div class="stitl">Browse</div>
+        <div class="sdesc">Explore verified hostels with transparent pricing and real photos.</div>
+      </div>
+      <div class="sitem">
+        <div class="snum">2</div>
+        <div class="stitl">Compare</div>
+        <div class="sdesc">Select up to 3 hostels and compare them side by side.</div>
+      </div>
+      <div class="sitem">
+        <div class="snum">3</div>
+        <div class="stitl">Apply</div>
+        <div class="sdesc">Fill in a quick form and we'll connect you with the manager.</div>
+      </div>
+      <div class="sitem">
+        <div class="snum">4</div>
+        <div class="stitl">Move In</div>
+        <div class="sdesc">Confirm your room and move in at your preferred date.</div>
+      </div>
     </div>
   </section>
 
@@ -132,7 +154,7 @@
     <div class="ftop">
       <div>
         <div class="fbrand">Lahore<span>Boys</span>Hostels</div>
-        <p class="fdesc">Lahore's most trusted boys hostel directory. Connecting students and professionals with verified accommodation since 2020.</p>
+        <p class="fdesc">Lahore's most trusted boys hostel directory. Connecting students and professionals with verified accommodation.</p>
       </div>
       <div class="fcol">
         <h4>Hostels</h4>
@@ -175,23 +197,29 @@
   <div id="m-apply" class="modal-ov">
     <div class="modal">
       <div class="mhdr">
-        <h3 id="m-apply-title">Apply for a Room</h3>
-        <p>Submit your details and we'll contact you within 24 hours</p>
+        <div>
+          <h3 id="m-apply-title">Apply for a Room</h3>
+          <p>Submit your details and we'll contact you within 24 hours</p>
+        </div>
         <button class="mx" onclick="closeModal('m-apply')">✕</button>
       </div>
       <div id="m-apply-body">
         <div class="mbody">
           <div class="frow">
             <div class="fg"><label>Full Name *</label><input id="ap-name" placeholder="Muhammad Ali"></div>
-            <div class="fg"><label>Phone *</label><input id="ap-phone" placeholder="+92 300..."></div>
+            <div class="fg"><label>Phone *</label><input id="ap-phone" placeholder="+92 300…"></div>
           </div>
           <div class="frow full">
             <div class="fg"><label>Room Type</label>
-              <select id="ap-room"><option>Sharing Room</option><option>Private Room</option><option>Any Available</option></select>
+              <select id="ap-room">
+                <option>Sharing Room</option>
+                <option>Private Room</option>
+                <option>Any Available</option>
+              </select>
             </div>
           </div>
           <div class="frow full">
-            <div class="fg"><label>Message (optional)</label><textarea id="ap-msg" placeholder="Move-in date, preferences..."></textarea></div>
+            <div class="fg"><label>Message (optional)</label><textarea id="ap-msg" placeholder="Move-in date, preferences…"></textarea></div>
           </div>
         </div>
         <div class="mfoot">
@@ -204,7 +232,7 @@
           <div class="s-icon">✅</div>
           <div class="s-title">Application Submitted!</div>
           <p class="s-sub">Your application has been received. The hostel manager will contact you within 24 hours via WhatsApp or phone.</p>
-          <button class="bsubmit" style="margin-top:1.2rem" onclick="closeModal('m-apply')">Close</button>
+          <div class="mfoot"><button class="bsubmit" onclick="closeModal('m-apply')">Close</button></div>
         </div>
       </div>
     </div>
@@ -214,11 +242,10 @@
   <div id="m-compare" class="modal-ov">
     <div class="modal cmp-modal">
       <div class="mhdr">
-        <h3>Hostel Comparison</h3>
-        <p>Side-by-side comparison of selected hostels</p>
+        <div><h3>Hostel Comparison</h3><p>Side-by-side comparison of selected hostels</p></div>
         <button class="mx" onclick="closeModal('m-compare')">✕</button>
       </div>
-      <div id="m-cmp-body"></div>
+      <div id="m-cmp-body" class="mbody"></div>
       <div class="mfoot">
         <button class="bcancel" onclick="closeModal('m-compare')">Close</button>
       </div>
@@ -234,35 +261,29 @@
 <div id="page-portal" class="page">
 
   <!-- Login Screen -->
-  <div id="l-wrap" style="background:#0E1117;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
+  <div id="l-wrap">
     <div style="width:100%;max-width:420px">
+      <div class="l-card">
+        <div class="l-brand">Lahore<span>Boys</span>Hostels</div>
+        <div class="l-subtitle">Management Portal</div>
 
-      <div style="text-align:center;margin-bottom:32px">
-        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:#E8EDF5">Lahore<span style="color:#E8B84B">Boys</span>Hostels</div>
-        <div style="color:#6B7A99;font-size:.83rem;margin-top:4px;letter-spacing:.04em">Management Portal</div>
-      </div>
+        <div class="l-section-label">Sign In to Your Portal</div>
 
-      <div style="background:#161B26;border:1px solid #2A3347;border-radius:12px;padding:28px">
-        <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:20px">Sign In to Your Portal</div>
-
-        <div style="margin-bottom:14px">
-          <label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Email</label>
+        <div class="l-field">
+          <label>Email</label>
           <input class="mfi" id="l-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')portalLogin()">
         </div>
-        <div style="margin-bottom:20px">
-          <label style="font-size:.72rem;color:#6B7A99;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Password</label>
+        <div class="l-field">
+          <label>Password</label>
           <input class="mfi" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')portalLogin()">
         </div>
 
-        <button class="mb mb-gold" id="l-btn" style="width:100%;justify-content:center" onclick="portalLogin()">Sign In</button>
-
-        <div id="l-err" style="display:none;margin-top:12px;padding:10px;background:#2A1A1A;border:1px solid #5A2020;border-radius:6px;font-size:.8rem;color:#E88080"></div>
-
-        <div style="margin-top:16px;text-align:center">
-          <a onclick="showForgotPassword()" style="font-size:.78rem;color:#6B7A99;cursor:pointer;text-decoration:underline">Forgot password?</a>
+        <button class="mb mb-gold" id="l-btn" style="width:100%;justify-content:center;padding:.62rem" onclick="portalLogin()">Sign In</button>
+        <div id="l-err"></div>
+        <div style="margin-top:1rem;text-align:center">
+          <a onclick="showForgotPassword()" style="font-size:.78rem;color:var(--muted);cursor:pointer;text-decoration:underline">Forgot password?</a>
         </div>
       </div>
-
       <button class="portal-back-btn" onclick="closePortal()">← Back to Hostel Directory</button>
     </div>
   </div>
