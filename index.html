@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lahore Boys Hostels — Find Your Perfect Hostel in Lahore</title>
 <meta name="description" content="Discover verified boys hostels in Lahore. Compare prices, amenities and locations. Apply online.">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#3B82F6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LBH Portal">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -865,6 +872,24 @@
 <!-- Load order: config → supabase client → app logic -->
 <script src="config.js"></script>
 <script src="supabase-client.js"></script>
-<script src="offline_engine.js"></script>`r`n<script src="script.js"></script>
+<script src="offline_engine.js"></script>
+<script src="script.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('[LBH] Service Worker registered:', reg.scope);
+    }).catch(err => {
+      console.warn('[LBH] SW registration failed:', err);
+    });
+  });
+}
+
+// Auto-open portal if ?portal=1 in URL (PWA shortcut)
+if (new URLSearchParams(location.search).get('portal') === '1') {
+  window.addEventListener('DOMContentLoaded', () => setTimeout(openPortal, 500));
+}
+</script>
 </body>
 </html>

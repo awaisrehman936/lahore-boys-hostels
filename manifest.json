@@ -1,0 +1,44 @@
+{
+  "name": "Lahore Boys Hostels",
+  "short_name": "LBH Portal",
+  "description": "Find hostels in Lahore. Manage tenants, rooms, payments & more — offline-first.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#081021",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "utilities"],
+  "lang": "en-PK",
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Manager Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portal Login",
+      "short_name": "Portal",
+      "description": "Access the management portal",
+      "url": "/?portal=1",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
