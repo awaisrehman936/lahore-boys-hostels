@@ -1,9 +1,9 @@
 // ============================================================
-// LBH PLATFORM — script.js v2.0
+// LBH PLATFORM â€” script.js v2.0
 // Supabase-powered. No localStorage for data. No hardcoded creds.
 // ============================================================
 
-// ─── GLOBAL STATE ───────────────────────────────────────────
+// â”€â”€â”€ GLOBAL STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let currentUser     = null;   // profile row from Supabase
 let currentHostelId = null;   // UUID of active hostel context
 let allHostels      = [];     // public directory cache
@@ -13,18 +13,34 @@ let viewMode        = 'grid'; // 'grid' | 'list'
 let applyHostelId   = null;   // hostel selected for application
 let mCurrentTab     = 'dashboard'; // active manager tab
 
-// ─── INIT ────────────────────────────────────────────────────
+// â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('DOMContentLoaded', async () => {
   loadTheme();
+  initObserver();
   await loadPublicDirectory();
   await restoreSession();
 });
 
-// ─── THEME ──────────────────────────────────────────────────
-const THEMES = ['white','charcoal','midnight','aqua','honey'];
+function initObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        entry.target.classList.add('active');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  window.observeElements = () => {
+    document.querySelectorAll('.reveal:not(.active)').forEach(el => observer.observe(el));
+  };
+}
+
+// â”€â”€â”€ THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const THEMES = ['midnight-blue','midnight-purple','charcoal','honey','teal'];
 
 function setTheme(t) {
-  if (!THEMES.includes(t)) t = 'white';
+  if (!THEMES.includes(t)) t = 'midnight-blue';
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('lbh_theme', t);
   document.querySelectorAll('.tp-dot').forEach(d => {
@@ -33,11 +49,11 @@ function setTheme(t) {
 }
 
 function loadTheme() {
-  const t = localStorage.getItem('lbh_theme') || 'white';
+  const t = localStorage.getItem('lbh_theme') || 'midnight-blue';
   setTheme(t);
 }
 
-// ─── PAGE NAVIGATION ─────────────────────────────────────────
+// â”€â”€â”€ PAGE NAVIGATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
@@ -50,7 +66,7 @@ function smoothScroll(sel) {
   if (el) el.scrollIntoView({ behavior: 'smooth' });
 }
 
-// ─── AUTH ────────────────────────────────────────────────────
+// â”€â”€â”€ AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function restoreSession() {
   try {
     const session = await Auth.getSession();
@@ -61,7 +77,7 @@ async function restoreSession() {
       showPortalView();
     }
   } catch (e) {
-    // No active session — stay on home
+    // No active session â€” stay on home
   }
 }
 
@@ -74,7 +90,7 @@ async function portalLogin() {
   err.style.display = 'none';
   if (!email || !pass) { showLoginErr('Please enter your email and password.'); return; }
 
-  btn.textContent = 'Signing in…';
+  btn.textContent = 'Signing inâ€¦';
   btn.disabled = true;
 
   try {
@@ -106,50 +122,7 @@ async function showForgotPassword() {
   }
 }
 
-async function logout() {
-  try { await Auth.signOut(); } catch (_) {}
-  currentUser     = null;
-  currentHostelId = null;
-  closePortal();
-}
 
-// ─── PORTAL OPEN/CLOSE ───────────────────────────────────────
-function openPortal() {
-  if (currentUser) {
-    showPortalView();
-  } else {
-    document.getElementById('l-wrap').style.display  = 'flex';
-    document.getElementById('p-wrap').style.display  = 'none';
-    document.getElementById('l-email').value = '';
-    document.getElementById('l-pass').value  = '';
-    document.getElementById('l-err').style.display = 'none';
-    document.getElementById('l-btn').textContent = 'Sign In';
-    document.getElementById('l-btn').disabled = false;
-    showPage('portal');
-  }
-}
-
-function closePortal() {
-  currentUser     = null;
-  currentHostelId = null;
-  showPage('home');
-  document.getElementById('l-wrap').style.display = 'flex';
-  document.getElementById('p-wrap').style.display = 'none';
-}
-
-// ─── PORTAL ROUTING ──────────────────────────────────────────
-function showPortalView() {
-  document.getElementById('l-wrap').style.display = 'none';
-  document.getElementById('p-wrap').style.display = 'block';
-  showPage('portal');
-  buildTopbar();
-  const role = currentUser?.role;
-  if (role === 'admin')     renderAdmin();
-  else if (role === 'manager') renderManager('dashboard');
-  else if (role === 'finance') renderFinance('overview');
-  else if (role === 'hostelite') renderHostelite();
-  else if (role === 'staff')   renderStaff();
-}
 
 function buildTopbar() {
   const u = currentUser;
@@ -168,7 +141,7 @@ function buildTopbar() {
     </div>`;
 }
 
-// ─── PUBLIC DIRECTORY ────────────────────────────────────────
+// â”€â”€â”€ PUBLIC DIRECTORY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadPublicDirectory() {
   try {
     allHostels = await Hostels.listActive();
@@ -185,8 +158,8 @@ function updateHeroStats() {
   const minP  = allHostels.reduce((m, h) => Math.min(m, h.price_from || 99999), 99999);
   const el = id => document.getElementById(id);
   if (el('stat-hostels')) el('stat-hostels').textContent = total;
-  if (el('stat-beds'))    el('stat-beds').textContent    = beds > 0 ? beds + '+' : '—';
-  if (el('stat-price'))   el('stat-price').textContent   = minP < 99999 ? 'Rs. ' + _fmt(minP) : '—';
+  if (el('stat-beds'))    el('stat-beds').textContent    = beds > 0 ? beds + '+' : 'â€”';
+  if (el('stat-price'))   el('stat-price').textContent   = minP < 99999 ? 'Rs. ' + _fmt(minP) : 'â€”';
 }
 
 function filterHostels() {
@@ -243,7 +216,7 @@ function hostelPhoto(h) {
   return `<img src="https://picsum.photos/seed/${seed}/600/300"
     alt="${h.name}" loading="lazy"
     style="width:100%;height:100%;object-fit:cover"
-    onerror="this.parentElement.innerHTML='<div class=hcard-img-fallback>🏢</div>'">`;
+    onerror="this.parentElement.innerHTML='<div class=hcard-img-fallback>ðŸ¢</div>'">`;
 }
 
 function renderHostelCards(list) {
@@ -253,13 +226,13 @@ function renderHostelCards(list) {
     grid.innerHTML = '<div class="empty-state"><p>No hostels match your search.</p></div>';
     return;
   }
-  grid.innerHTML = list.map(h => {
+  grid.innerHTML = list.map((h, i) => {
     const inCompare  = compareList.includes(h.id);
     const amenityTags = (h.amenities || []).slice(0, 4).map(a =>
       `<span class="htag">${a}</span>`).join('');
     const safeName = h.name.replace(/'/g, "\\'");
     return `
-    <div class="hcard ${inCompare ? 'hcard-selected' : ''}" data-id="${h.id}">
+    <div class="hcard reveal ${inCompare ? 'hcard-selected' : ''}" style="transition-delay: ${i*0.05}s" data-id="${h.id}">
       <div class="hcard-img">
         ${hostelPhoto(h)}
         <span class="hcard-badge">Verified</span>
@@ -267,33 +240,35 @@ function renderHostelCards(list) {
       <div class="hcard-body">
         <div class="hcard-top">
           <div class="hcard-name">${h.name}</div>
-          <div class="hcard-area">📍 ${h.area || h.city}</div>
+          <div class="hcard-area">ðŸ“ ${h.area || h.city}</div>
         </div>
         <div class="hcard-price">
           <span class="hp-from">Rs. ${_fmt(h.price_from || 0)}</span>
           <span class="hp-mo">/month</span>
         </div>
         <div class="hcard-tags">${amenityTags}</div>
-        ${h.rating ? `<div class="hcard-rating">${stars(h.rating)} <small style="color:var(--muted)">${h.rating}</small></div>` : ''}
+        ${h.rating ? `<div class="hcard-rating">${stars(h.rating)}</div>` : ''}
         <div class="hcard-actions">
-          <button class="hc-btn hc-apply" onclick="openApply('${h.id}','${safeName}')">Apply Now</button>
-          ${h.website_url ? `<a class="hc-btn hc-visit" href="${h.website_url}" target="_blank" rel="noopener">Website ↗</a>` : ''}
+          <button class="hc-btn hc-apply" onclick="openApply('${h.id}','${safeName}')">Apply</button>
+          ${h.website_url ? `<a class="hc-btn hc-visit" href="${h.website_url}" target="_blank" rel="noopener">Web â†—</a>` : ''}
           <button class="hc-btn hc-cmp ${inCompare ? 'hc-cmp-active' : ''}"
             onclick="toggleCompare('${h.id}',this)">
-            ${inCompare ? '✓ Comparing' : '+ Compare'}
+            ${inCompare ? 'âœ“ Compare' : '+ Compare'}
           </button>
         </div>
       </div>
     </div>`;
   }).join('');
+  
+  if (window.observeElements) setTimeout(window.observeElements, 50);
 }
 
 function stars(r) {
   const full = Math.floor(r), half = r % 1 >= 0.5 ? 1 : 0, empty = 5 - full - half;
-  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+  return 'â˜…'.repeat(full) + (half ? 'Â½' : '') + 'â˜†'.repeat(empty);
 }
 
-// ─── COMPARE ────────────────────────────────────────────────
+// â”€â”€â”€ COMPARE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function toggleCompare(id, btn) {
   if (compareList.includes(id)) {
     compareList = compareList.filter(x => x !== id);
@@ -318,12 +293,12 @@ function updateCompareBar() {
   const slots = document.getElementById('cmp-slots');
   if (slots) slots.innerHTML = compareList.map(id => {
     const h = allHostels.find(x => x.id === id);
-    return `<div class="cslot">${h?.name || id} <span onclick="toggleCompare('${id}',null)" style="cursor:pointer;margin-left:4px">✕</span></div>`;
+    return `<div class="cslot">${h?.name || id} <span onclick="toggleCompare('${id}',null)" style="cursor:pointer;margin-left:4px">âœ•</span></div>`;
   }).join('') + Array(3 - compareList.length).fill('<div class="cslot empty">+ Add hostel</div>').join('');
   const iSlots = document.getElementById('inline-compare-slots');
   if (iSlots) iSlots.innerHTML = compareList.map(id => {
     const h = allHostels.find(x => x.id === id);
-    return `<span class="cislot">${h?.name?.split(' ')[0] || '…'}</span>`;
+    return `<span class="cislot">${h?.name?.split(' ')[0] || 'â€¦'}</span>`;
   }).join('') + Array(3 - compareList.length).fill('<span class="cislot empty">+</span>').join('');
 }
 
@@ -343,9 +318,9 @@ function openCompare() {
       <thead><tr><th>Feature</th>${selected.map(h => `<th>${h.name}</th>`).join('')}</tr></thead>
       <tbody>
         ${fields.map(f => `<tr><td>${labels[f]}</td>${selected.map(h =>
-          `<td>${f === 'price_from' ? 'Rs. ' + _fmt(h[f] || 0) : (h[f] || '—')}</td>`).join('')}</tr>`).join('')}
+          `<td>${f === 'price_from' ? 'Rs. ' + _fmt(h[f] || 0) : (h[f] || 'â€”')}</td>`).join('')}</tr>`).join('')}
         <tr><td>Amenities</td>${selected.map(h =>
-          `<td>${(h.amenities||[]).join(', ') || '—'}</td>`).join('')}</tr>
+          `<td>${(h.amenities||[]).join(', ') || 'â€”'}</td>`).join('')}</tr>
         <tr><td>Apply</td>${selected.map(h =>
           `<td><button class="hc-btn hc-apply" onclick="openApply('${h.id}','${h.name.replace(/'/g,"\\'")}');closeModal('m-compare')">Apply</button></td>`).join('')}</tr>
       </tbody>
@@ -353,10 +328,10 @@ function openCompare() {
   openModal('m-compare');
 }
 
-// ─── APPLY MODAL ─────────────────────────────────────────────
+// â”€â”€â”€ APPLY MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openApply(hostelId, hostelName) {
   applyHostelId = hostelId;
-  document.getElementById('m-apply-title').textContent = 'Apply — ' + hostelName;
+  document.getElementById('m-apply-title').textContent = 'Apply â€” ' + hostelName;
   document.getElementById('m-apply-body').style.display = 'block';
   document.getElementById('m-apply-success').style.display = 'none';
   document.getElementById('ap-name').value = '';
@@ -386,11 +361,11 @@ async function submitApply() {
   }
 }
 
-// ─── MODAL HELPERS ───────────────────────────────────────────
+// â”€â”€â”€ MODAL HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openModal(id)  { const m = document.getElementById(id); if (m) m.style.display = 'flex'; }
 function closeModal(id) { const m = document.getElementById(id); if (m) m.style.display = 'none'; }
 
-// ─── TOAST ───────────────────────────────────────────────────
+// â”€â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function toast(msg) {
   let c = document.getElementById('toast-c');
   if (!c) return;
@@ -409,12 +384,12 @@ function mToast(msg, type = 'info') {
   setTimeout(() => d.remove(), 3500);
 }
 
-// ─── PORTAL: MANAGER ─────────────────────────────────────────
+// â”€â”€â”€ PORTAL: MANAGER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderManager(tab) {
   mCurrentTab = tab || 'dashboard';
   const tabs = ['dashboard','tenants','rooms','payments','maintenance','notices','expenses','bills','staff','visitors','attendance','settings'];
-  const icons = { dashboard:'⊞', tenants:'👥', rooms:'🛏', payments:'💰', maintenance:'🔧',
-                  notices:'📢', expenses:'📊', bills:'🧾', staff:'👤', visitors:'🚪', attendance:'📋', settings:'⚙️' };
+  const icons = { dashboard:'âŠž', tenants:'ðŸ‘¥', rooms:'ðŸ›', payments:'ðŸ’°', maintenance:'ðŸ”§',
+                  notices:'ðŸ“¢', expenses:'ðŸ“Š', bills:'ðŸ§¾', staff:'ðŸ‘¤', visitors:'ðŸšª', attendance:'ðŸ“‹', settings:'âš™ï¸' };
   document.getElementById('p-main-content').innerHTML = `
     <div class="portal-layout">
       <nav class="p-sidenav">
@@ -425,7 +400,7 @@ function renderManager(tab) {
           </button>`).join('')}
       </nav>
       <div class="p-content" id="p-tab-content">
-        <div class="loading">Loading…</div>
+        <div class="loading">Loadingâ€¦</div>
       </div>
     </div>`;
   const fns = {
@@ -439,7 +414,7 @@ function renderManager(tab) {
 
 function tabContent() { return document.getElementById('p-tab-content'); }
 
-// ── DASHBOARD ──
+// â”€â”€ DASHBOARD â”€â”€
 async function renderMDash() {
   const tc = tabContent(); if (!tc) return;
   try {
@@ -465,20 +440,20 @@ async function renderMDash() {
         <div class="dash-date">${new Date().toLocaleDateString('en-PK',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
       </div>
       <div class="stat-grid">
-        ${statCard('Active Tenants', tenants.length, '👥', 'blue')}
-        ${statCard('Vacant Beds',    vacantBeds,     '🛏', vacantBeds > 0 ? 'green' : 'muted')}
-        ${statCard('Collected ('+_mlabel(_curMonth())+')', 'Rs. '+_fmt(collected), '💰', 'gold')}
-        ${statCard('Open Issues',    maint.length,   '🔧', maint.length > 0 ? 'red' : 'green')}
+        ${statCard('Active Tenants', tenants.length, 'ðŸ‘¥', 'blue')}
+        ${statCard('Vacant Beds',    vacantBeds,     'ðŸ›', vacantBeds > 0 ? 'green' : 'muted')}
+        ${statCard('Collected ('+_mlabel(_curMonth())+')', 'Rs. '+_fmt(collected), 'ðŸ’°', 'gold')}
+        ${statCard('Open Issues',    maint.length,   'ðŸ”§', maint.length > 0 ? 'red' : 'green')}
       </div>
       <div class="dash-widgets">
         <div class="widget">
           <div class="widget-title">Unpaid This Month ${unpaid.length ? `<span class="badge-red">${unpaid.length}</span>` : ''}</div>
           ${unpaid.length === 0
-            ? '<div class="widget-empty">All tenants paid for this month 🎉</div>'
+            ? '<div class="widget-empty">All tenants paid for this month ðŸŽ‰</div>'
             : `<table class="mini-table"><thead><tr><th>TID</th><th>Name</th><th>Room</th><th>Rent</th><th></th></tr></thead><tbody>
                ${unpaid.slice(0,6).map(t => `<tr>
                  <td><code>${t.tid}</code></td><td>${t.name}</td>
-                 <td>${t.rooms?.room_number||'—'}</td>
+                 <td>${t.rooms?.room_number||'â€”'}</td>
                  <td>Rs. ${_fmt(t.rent)}</td>
                  <td><button class="mb mb-sm mb-gold" onclick="openPayModal('${t.id}','${t.name.replace(/'/g,"\\'")}',${t.rent})">Pay</button></td>
                </tr>`).join('')}
@@ -518,10 +493,10 @@ function statCard(label, value, icon, color) {
   </div>`;
 }
 
-// ── TENANTS ──
+// â”€â”€ TENANTS â”€â”€
 async function renderMTenants() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading tenants…</div>';
+  tc.innerHTML = '<div class="loading">Loading tenantsâ€¦</div>';
   try {
     const tenants = await Tenants.list(currentHostelId);
     tc.innerHTML = `
@@ -530,7 +505,7 @@ async function renderMTenants() {
         <button class="mb mb-gold" onclick="openMAddTenant()">+ Add Tenant</button>
       </div>
       <div class="search-bar">
-        <input type="text" placeholder="Search by name, TID, phone…" oninput="filterTenantTable(this.value)" id="tenant-search">
+        <input type="text" placeholder="Search by name, TID, phoneâ€¦" oninput="filterTenantTable(this.value)" id="tenant-search">
         <select onchange="filterTenantTable(document.getElementById('tenant-search').value)" id="tenant-status-filter">
           <option value="all">All Statuses</option>
           <option value="active">Active</option>
@@ -552,9 +527,9 @@ async function renderMTenants() {
 function renderTenantRows(tenants) {
   if (!tenants.length) return '<tr><td colspan="7" class="empty-td">No tenants found</td></tr>';
   return tenants.map(t => `<tr class="${t.status !== 'active' ? 'row-inactive' : ''}">
-    <td><code>${t.tid || '—'}</code></td>
+    <td><code>${t.tid || 'â€”'}</code></td>
     <td>${t.name}</td>
-    <td>${t.rooms?.room_number || '—'}</td>
+    <td>${t.rooms?.room_number || 'â€”'}</td>
     <td>Rs. ${_fmt(t.rent)}</td>
     <td>${_fdate(t.move_in_date)}</td>
     <td><span class="badge badge-${t.status === 'active' ? 'green' : 'muted'}">${t.status}</span></td>
@@ -581,7 +556,7 @@ function filterTenantTable(q) {
 function tenantFormModal() {
   return `<div id="m-add-tenant" class="modal-ov" style="display:none">
     <div class="modal">
-      <div class="mhdr"><h3 id="tenant-modal-title">Add Tenant</h3><button class="mx" onclick="closeModal('m-add-tenant')">✕</button></div>
+      <div class="mhdr"><h3 id="tenant-modal-title">Add Tenant</h3><button class="mx" onclick="closeModal('m-add-tenant')">âœ•</button></div>
       <div class="mbody">
         <div class="frow">
           <div class="fg"><label>Full Name *</label><input id="t-name" placeholder="Muhammad Ali"></div>
@@ -599,7 +574,7 @@ function tenantFormModal() {
         </div>
         <div class="frow">
           <div class="fg"><label>Employer / Institution</label><input id="t-emp" placeholder="UET Lahore / Company Name"></div>
-          <div class="fg"><label>Room</label><select id="t-room"><option value="">Select room…</option></select></div>
+          <div class="fg"><label>Room</label><select id="t-room"><option value="">Select roomâ€¦</option></select></div>
         </div>
         <div class="frow">
           <div class="fg"><label>Monthly Rent (Rs.) *</label><input id="t-rent" type="number" placeholder="7000"></div>
@@ -612,7 +587,7 @@ function tenantFormModal() {
           </div>
         </div>
         <div class="frow full">
-          <div class="fg"><label>Notes</label><textarea id="t-notes" placeholder="Any additional notes…"></textarea></div>
+          <div class="fg"><label>Notes</label><textarea id="t-notes" placeholder="Any additional notesâ€¦"></textarea></div>
         </div>
       </div>
       <div class="mfoot">
@@ -628,7 +603,7 @@ async function openMAddTenant() {
   try {
     const rooms = await Rooms.list(currentHostelId);
     const sel = document.getElementById('t-room');
-    if (sel) sel.innerHTML = '<option value="">Select room…</option>' +
+    if (sel) sel.innerHTML = '<option value="">Select roomâ€¦</option>' +
       rooms.map(r => `<option value="${r.id}">Room ${r.room_number} (${r.type}, Rs.${_fmt(r.price)})</option>`).join('');
   } catch (_) {}
   document.getElementById('tenant-modal-title').textContent = 'Add Tenant';
@@ -648,7 +623,7 @@ async function saveTenant() {
   const movein = document.getElementById('t-movein').value;
   if (!name || !phone || !rent || !movein) { mToast('Name, phone, rent and move-in date are required', 'error'); return; }
   const btn = document.getElementById('t-save-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled = true; btn.textContent = 'Savingâ€¦';
   try {
     await Tenants.create({
       hostel_id:         currentHostelId,
@@ -688,7 +663,7 @@ async function viewTenant(id) {
           <td><span class="badge badge-blue">${p.type}</span></td>
           <td>${p.method}</td>
           <td>${_fdate(p.payment_date)}</td>
-          <td>${p.notes||'—'}</td>
+          <td>${p.notes||'â€”'}</td>
         </tr>`).join('')
       : '<tr><td colspan="6" class="empty-td">No payments recorded</td></tr>';
     const diffColor = balance.diff >= 0 ? 'green' : 'red';
@@ -696,15 +671,15 @@ async function viewTenant(id) {
     const html = `<div id="m-view-tenant" class="modal-ov" style="display:flex">
       <div class="modal modal-lg">
         <div class="mhdr">
-          <div><h3>${t.name}</h3><p><code>${t.tid}</code> · ${t.rooms?.room_number ? 'Room '+t.rooms.room_number : 'No Room'}</p></div>
-          <button class="mx" onclick="closeModal('m-view-tenant');this.closest('.modal-ov').remove()">✕</button>
+          <div><h3>${t.name}</h3><p><code>${t.tid}</code> Â· ${t.rooms?.room_number ? 'Room '+t.rooms.room_number : 'No Room'}</p></div>
+          <button class="mx" onclick="closeModal('m-view-tenant');this.closest('.modal-ov').remove()">âœ•</button>
         </div>
         <div class="mbody">
           <div class="detail-grid">
-            ${mFld('Phone', t.phone)}${mFld('CNIC', t.cnic||'—')}
-            ${mFld("Father's Name", t.father_name||'—')}${mFld('Emergency', t.emergency_contact||'—')}
-            ${mFld('Occupation', t.occupation||'—')}${mFld('Employer', t.employer||'—')}
-            ${mFld('Move-In', _fdate(t.move_in_date))}${mFld('Move-Out', t.move_out_date ? _fdate(t.move_out_date) : '—')}
+            ${mFld('Phone', t.phone)}${mFld('CNIC', t.cnic||'â€”')}
+            ${mFld("Father's Name", t.father_name||'â€”')}${mFld('Emergency', t.emergency_contact||'â€”')}
+            ${mFld('Occupation', t.occupation||'â€”')}${mFld('Employer', t.employer||'â€”')}
+            ${mFld('Move-In', _fdate(t.move_in_date))}${mFld('Move-Out', t.move_out_date ? _fdate(t.move_out_date) : 'â€”')}
             ${mFld('Monthly Rent', 'Rs. '+_fmt(t.rent))}${mFld('Deposit', 'Rs. '+_fmt(t.deposit||0))}
           </div>
           <div class="balance-bar">
@@ -746,10 +721,10 @@ function mFld(label, value) {
   return `<div class="detail-field"><div class="df-lbl">${label}</div><div class="df-val">${value}</div></div>`;
 }
 
-// ── ROOMS ──
+// â”€â”€ ROOMS â”€â”€
 async function renderMRooms() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading rooms…</div>';
+  tc.innerHTML = '<div class="loading">Loading roomsâ€¦</div>';
   try {
     const rooms = await Rooms.listWithOccupancy(currentHostelId);
     tc.innerHTML = `
@@ -760,7 +735,7 @@ async function renderMRooms() {
           const color = pct >= 100 ? 'red' : pct >= 60 ? 'gold' : 'green';
           return `<div class="room-card">
             <div class="rc-num">Room ${r.room_number}</div>
-            <div class="rc-floor">Floor ${r.floor||1} · ${r.type}</div>
+            <div class="rc-floor">Floor ${r.floor||1} Â· ${r.type}</div>
             <div class="rc-price">Rs. ${_fmt(r.price)}/mo</div>
             <div class="rc-beds">
               ${Array(r.capacity).fill(0).map((_,i) =>
@@ -776,7 +751,7 @@ async function renderMRooms() {
   }
 }
 
-// ── PAYMENTS ──
+// â”€â”€ PAYMENTS â”€â”€
 let paySubview = 'monthly';
 
 async function renderMPayments(sub) {
@@ -789,7 +764,7 @@ async function renderMPayments(sub) {
       <button class="stab ${paySubview==='ledger'?'active':''}"    onclick="renderMPayments('ledger')">Per-Tenant Ledger</button>
       <button class="stab ${paySubview==='advances'?'active':''}"  onclick="renderMPayments('advances')">Advances & Extras</button>
     </div>
-    <div id="pay-subview-content"><div class="loading">Loading…</div></div>
+    <div id="pay-subview-content"><div class="loading">Loadingâ€¦</div></div>
     ${paymentFormModal()}`;
   if (paySubview === 'monthly')   renderPayMonthly();
   if (paySubview === 'ledger')    renderPayLedger();
@@ -819,10 +794,10 @@ async function renderPayMonthly() {
             const paid = paidIds.has(t.id);
             return `<tr>
               <td><code>${t.tid}</code></td><td>${t.name}</td>
-              <td>${t.rooms?.room_number||'—'}</td>
+              <td>${t.rooms?.room_number||'â€”'}</td>
               <td>Rs. ${_fmt(t.rent)}</td>
               <td><span class="badge badge-${paid?'green':'red'}">${paid?'Paid':'Pending'}</span></td>
-              <td>${paid ? '—' : `<button class="mb mb-sm mb-gold" onclick="openPayModal('${t.id}','${t.name.replace(/'/g,"\\'")}',${t.rent})">Pay</button>`}</td>
+              <td>${paid ? 'â€”' : `<button class="mb mb-sm mb-gold" onclick="openPayModal('${t.id}','${t.name.replace(/'/g,"\\'")}',${t.rent})">Pay</button>`}</td>
             </tr>`;
           }).join('')}</tbody>
         </table>
@@ -838,8 +813,8 @@ async function renderPayLedger() {
       <div class="fg" style="max-width:360px;margin-bottom:1rem">
         <label>Select Tenant</label>
         <select id="ledger-tenant-sel" onchange="loadTenantLedger(this.value)">
-          <option value="">Choose a tenant…</option>
-          ${tenants.map(t => `<option value="${t.id}">${t.tid} — ${t.name}</option>`).join('')}
+          <option value="">Choose a tenantâ€¦</option>
+          ${tenants.map(t => `<option value="${t.id}">${t.tid} â€” ${t.name}</option>`).join('')}
         </select>
       </div>
       <div id="ledger-detail"></div>`;
@@ -848,7 +823,7 @@ async function renderPayLedger() {
 
 async function loadTenantLedger(tid) {
   const el = document.getElementById('ledger-detail'); if (!el || !tid) return;
-  el.innerHTML = '<div class="loading">Loading ledger…</div>';
+  el.innerHTML = '<div class="loading">Loading ledgerâ€¦</div>';
   try {
     const [pays, balance] = await Promise.all([
       Payments.listByTenant(tid, 36),
@@ -868,7 +843,7 @@ async function loadTenantLedger(tid) {
           ? pays.map(p => `<tr>
               <td>${_mlabel(p.month)}</td><td>Rs. ${_fmt(p.amount)}</td>
               <td><span class="badge badge-blue">${p.type}</span></td>
-              <td>${p.method}</td><td>${_fdate(p.payment_date)}</td><td>${p.notes||'—'}</td>
+              <td>${p.method}</td><td>${_fdate(p.payment_date)}</td><td>${p.notes||'â€”'}</td>
             </tr>`).join('')
           : '<tr><td colspan="6" class="empty-td">No payments</td></tr>'}
         </tbody>
@@ -893,7 +868,7 @@ async function renderPayAdvances() {
             <td>${tMap[p.tenant_id]?.name || p.tenant_id}</td>
             <td>Rs. ${_fmt(p.amount)}</td>
             <td><span class="badge badge-blue">${p.type}</span></td>
-            <td>${p.method}</td><td>${_fdate(p.payment_date)}</td><td>${p.notes||'—'}</td>
+            <td>${p.method}</td><td>${_fdate(p.payment_date)}</td><td>${p.notes||'â€”'}</td>
           </tr>`).join('')}</tbody>
         </table></div>`;
   } catch (e) { el.innerHTML = `<div class="error-state">${e.message}</div>`; }
@@ -902,10 +877,10 @@ async function renderPayAdvances() {
 function paymentFormModal() {
   return `<div id="m-pay" class="modal-ov" style="display:none">
     <div class="modal">
-      <div class="mhdr"><h3>Record Payment</h3><button class="mx" onclick="closeModal('m-pay')">✕</button></div>
+      <div class="mhdr"><h3>Record Payment</h3><button class="mx" onclick="closeModal('m-pay')">âœ•</button></div>
       <div class="mbody">
         <div class="frow">
-          <div class="fg"><label>Tenant *</label><select id="pay-tenant"><option value="">Select tenant…</option></select></div>
+          <div class="fg"><label>Tenant *</label><select id="pay-tenant"><option value="">Select tenantâ€¦</option></select></div>
           <div class="fg"><label>Month *</label><input id="pay-month" type="month" value="${_curMonth()}"></div>
         </div>
         <div class="frow">
@@ -941,7 +916,7 @@ function paymentFormModal() {
         <div id="pay-overreason-row" class="frow" style="display:none">
           <div class="fg full"><label>Reason for Overpayment</label>
             <select id="pay-overreason">
-              <option value="">Select reason…</option>
+              <option value="">Select reasonâ€¦</option>
               <option value="advance_future">Advance for future months</option>
               <option value="rounding">Rounding up</option>
               <option value="utilities">Extra for utilities/bills</option>
@@ -952,10 +927,10 @@ function paymentFormModal() {
           </div>
         </div>
         <div class="frow full">
-          <div class="fg"><label>Notes</label><textarea id="pay-notes" placeholder="Optional notes…"></textarea></div>
+          <div class="fg"><label>Notes</label><textarea id="pay-notes" placeholder="Optional notesâ€¦"></textarea></div>
         </div>
         <div id="pay-dup-warn" style="display:none;padding:8px 12px;background:#2A1A1A;border:1px solid #5A2020;border-radius:6px;font-size:.8rem;color:#E88080;margin-top:.5rem">
-          ⚠ A regular payment already exists for this tenant this month.
+          âš  A regular payment already exists for this tenant this month.
         </div>
       </div>
       <div class="mfoot">
@@ -971,8 +946,8 @@ async function openPayModal(tenantId, tenantName, rent) {
     const tenants = await Tenants.list(currentHostelId, { status: 'active' });
     const sel = document.getElementById('pay-tenant');
     if (sel) {
-      sel.innerHTML = '<option value="">Select tenant…</option>' +
-        tenants.map(t => `<option value="${t.id}" data-rent="${t.rent}">${t.tid} — ${t.name}</option>`).join('');
+      sel.innerHTML = '<option value="">Select tenantâ€¦</option>' +
+        tenants.map(t => `<option value="${t.id}" data-rent="${t.rent}">${t.tid} â€” ${t.name}</option>`).join('');
       if (tenantId) sel.value = tenantId;
     }
     if (rent) document.getElementById('pay-amount').value = rent;
@@ -1000,7 +975,7 @@ function calcAdvanceHint() {
   const sel    = document.getElementById('pay-tenant');
   const rent   = sel?.selectedOptions[0]?.dataset?.rent || 0;
   const hint   = document.getElementById('pay-adv-hint');
-  if (hint && months && rent) hint.textContent = `${months} × Rs. ${_fmt(rent)} = Rs. ${_fmt(months * rent)}`;
+  if (hint && months && rent) hint.textContent = `${months} Ã— Rs. ${_fmt(rent)} = Rs. ${_fmt(months * rent)}`;
 }
 
 async function savePayment() {
@@ -1025,7 +1000,7 @@ async function savePayment() {
   }
 
   const btn = document.getElementById('pay-save-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled = true; btn.textContent = 'Savingâ€¦';
   try {
     await Payments.create({
       hostel_id:          currentHostelId,
@@ -1046,10 +1021,10 @@ async function savePayment() {
   }
 }
 
-// ── MAINTENANCE ──
+// â”€â”€ MAINTENANCE â”€â”€
 async function renderMMaint() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const items = await Maintenance.list(currentHostelId);
     tc.innerHTML = `
@@ -1082,7 +1057,7 @@ function renderMaintCards(items) {
         <span class="badge badge-${m.status === 'resolved' ? 'green' : m.status === 'in-progress' ? 'blue' : 'muted'}">${m.status}</span>
       </div>
       <div class="mc-title">${m.title}</div>
-      <div class="mc-cat">${m.category} ${m.rooms ? '· Room '+m.rooms.room_number : ''}</div>
+      <div class="mc-cat">${m.category} ${m.rooms ? 'Â· Room '+m.rooms.room_number : ''}</div>
       ${m.description ? `<div class="mc-desc">${m.description}</div>` : ''}
       <div class="mc-date">${_fdate(m.created_at)}</div>
       ${m.status !== 'resolved' ? `<button class="mb mb-sm mb-green" onclick="resolveMaint('${m.id}')">Mark Resolved</button>` : `<div style="font-size:.75rem;color:var(--muted)">Resolved: ${_fdate(m.resolved_at)}</div>`}
@@ -1092,7 +1067,7 @@ function renderMaintCards(items) {
 function maintModal() {
   return `<div id="m-maint" class="modal-ov" style="display:none">
     <div class="modal">
-      <div class="mhdr"><h3>Log Maintenance Issue</h3><button class="mx" onclick="closeModal('m-maint')">✕</button></div>
+      <div class="mhdr"><h3>Log Maintenance Issue</h3><button class="mx" onclick="closeModal('m-maint')">âœ•</button></div>
       <div class="mbody">
         <div class="frow">
           <div class="fg"><label>Title *</label><input id="mi-title" placeholder="Tap leaking in Room 101"></div>
@@ -1107,7 +1082,7 @@ function maintModal() {
           <div class="fg"><label>Room</label><select id="mi-room"><option value="">All / Common Area</option></select></div>
         </div>
         <div class="frow full">
-          <div class="fg"><label>Description</label><textarea id="mi-desc" placeholder="Describe the issue…"></textarea></div>
+          <div class="fg"><label>Description</label><textarea id="mi-desc" placeholder="Describe the issueâ€¦"></textarea></div>
         </div>
       </div>
       <div class="mfoot">
@@ -1133,7 +1108,7 @@ async function saveMaint() {
   const title = document.getElementById('mi-title').value.trim();
   if (!title) { mToast('Title is required', 'error'); return; }
   const btn = document.getElementById('mi-save-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled = true; btn.textContent = 'Savingâ€¦';
   try {
     await Maintenance.create({
       hostel_id:   currentHostelId,
@@ -1162,10 +1137,10 @@ async function resolveMaint(id) {
   } catch (e) { mToast(e.message, 'error'); }
 }
 
-// ── NOTICES ──
+// â”€â”€ NOTICES â”€â”€
 async function renderMNotices() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const notices = await Notices.list(currentHostelId);
     tc.innerHTML = `
@@ -1187,7 +1162,7 @@ async function renderMNotices() {
       </div>
       <div id="m-notice" class="modal-ov" style="display:none">
         <div class="modal">
-          <div class="mhdr"><h3>Post Notice</h3><button class="mx" onclick="closeModal('m-notice')">✕</button></div>
+          <div class="mhdr"><h3>Post Notice</h3><button class="mx" onclick="closeModal('m-notice')">âœ•</button></div>
           <div class="mbody">
             <div class="frow">
               <div class="fg"><label>Title *</label><input id="n-title" placeholder="Notice title"></div>
@@ -1201,7 +1176,7 @@ async function renderMNotices() {
               </div>
             </div>
             <div class="frow full">
-              <div class="fg"><label>Message *</label><textarea id="n-body" placeholder="Notice content…" rows="4"></textarea></div>
+              <div class="fg"><label>Message *</label><textarea id="n-body" placeholder="Notice contentâ€¦" rows="4"></textarea></div>
             </div>
           </div>
           <div class="mfoot">
@@ -1223,7 +1198,7 @@ async function saveNotice() {
   const body  = document.getElementById('n-body').value.trim();
   if (!title || !body) { mToast('Title and message are required', 'error'); return; }
   const btn = document.getElementById('n-save-btn');
-  btn.disabled = true; btn.textContent = 'Posting…';
+  btn.disabled = true; btn.textContent = 'Postingâ€¦';
   try {
     await Notices.create({ hostel_id: currentHostelId, title, body, category: document.getElementById('n-cat').value, priority: document.getElementById('n-pri').value, posted_by: currentUser.id });
     closeModal('m-notice');
@@ -1238,10 +1213,10 @@ async function deleteNotice(id) {
   catch (e) { mToast(e.message, 'error'); }
 }
 
-// ── EXPENSES ──
+// â”€â”€ EXPENSES â”€â”€
 async function renderMExpenses() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const items = await Expenses.list(currentHostelId);
     const total = items.reduce((s, e) => s + Number(e.amount), 0);
@@ -1256,7 +1231,7 @@ async function renderMExpenses() {
                 <td>${_fdate(e.expense_date)}</td>
                 <td><span class="badge">${e.category}</span></td>
                 <td>Rs. ${_fmt(e.amount)}</td>
-                <td>${e.description||'—'}</td>
+                <td>${e.description||'â€”'}</td>
                 <td><button class="mb mb-sm mb-red" onclick="deleteExpense('${e.id}')">Delete</button></td>
               </tr>`).join('')}
           </tbody>
@@ -1264,7 +1239,7 @@ async function renderMExpenses() {
       </div>
       <div id="m-expense" class="modal-ov" style="display:none">
         <div class="modal">
-          <div class="mhdr"><h3>Add Expense</h3><button class="mx" onclick="closeModal('m-expense')">✕</button></div>
+          <div class="mhdr"><h3>Add Expense</h3><button class="mx" onclick="closeModal('m-expense')">âœ•</button></div>
           <div class="mbody">
             <div class="frow">
               <div class="fg"><label>Category *</label>
@@ -1298,7 +1273,7 @@ async function saveExpense() {
   const amount = parseFloat(document.getElementById('ex-amount').value);
   if (!amount) { mToast('Amount is required', 'error'); return; }
   const btn = document.getElementById('ex-save-btn');
-  btn.disabled=true; btn.textContent='Saving…';
+  btn.disabled=true; btn.textContent='Savingâ€¦';
   try {
     await Expenses.create({ hostel_id: currentHostelId, category: document.getElementById('ex-cat').value, amount, description: document.getElementById('ex-desc').value.trim()||null, expense_date: document.getElementById('ex-date').value, added_by: currentUser.id });
     closeModal('m-expense'); mToast('Expense added','success'); renderMExpenses();
@@ -1311,10 +1286,10 @@ async function deleteExpense(id) {
   catch (e) { mToast(e.message,'error'); }
 }
 
-// ── BILLS ──
+// â”€â”€ BILLS â”€â”€
 async function renderMBills() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const bills = await Bills.list(currentHostelId);
     tc.innerHTML = `
@@ -1328,7 +1303,7 @@ async function renderMBills() {
                 <td>${_mlabel(b.month)}</td>
                 <td><span class="badge">${b.type}</span></td>
                 <td>Rs. ${_fmt(b.amount)}</td>
-                <td>${b.due_date ? _fdate(b.due_date) : '—'}</td>
+                <td>${b.due_date ? _fdate(b.due_date) : 'â€”'}</td>
                 <td><span class="badge badge-${b.status==='paid'?'green':b.status==='overdue'?'red':'orange'}">${b.status}</span></td>
                 <td>${b.status !== 'paid' ? `<button class="mb mb-sm mb-green" onclick="markBillPaid('${b.id}')">Mark Paid</button>` : _fdate(b.paid_on)}
                 <button class="mb mb-sm mb-red" onclick="deleteBill('${b.id}')">Del</button></td>
@@ -1338,7 +1313,7 @@ async function renderMBills() {
       </div>
       <div id="m-bill" class="modal-ov" style="display:none">
         <div class="modal">
-          <div class="mhdr"><h3>Add Utility Bill</h3><button class="mx" onclick="closeModal('m-bill')">✕</button></div>
+          <div class="mhdr"><h3>Add Utility Bill</h3><button class="mx" onclick="closeModal('m-bill')">âœ•</button></div>
           <div class="mbody">
             <div class="frow">
               <div class="fg"><label>Type *</label>
@@ -1371,7 +1346,7 @@ async function saveBill() {
   const amount = parseFloat(document.getElementById('bl-amount').value);
   if (!amount) { mToast('Amount is required','error'); return; }
   const btn = document.getElementById('bl-save-btn');
-  btn.disabled=true; btn.textContent='Saving…';
+  btn.disabled=true; btn.textContent='Savingâ€¦';
   try {
     await Bills.create({ hostel_id: currentHostelId, type: document.getElementById('bl-type').value, month: document.getElementById('bl-month').value, amount, due_date: document.getElementById('bl-due').value||null, notes: document.getElementById('bl-notes').value.trim()||null, added_by: currentUser.id });
     closeModal('m-bill'); mToast('Bill added','success'); renderMBills();
@@ -1389,10 +1364,10 @@ async function deleteBill(id) {
   catch (e) { mToast(e.message,'error'); }
 }
 
-// ── STAFF ──
+// â”€â”€ STAFF â”€â”€
 async function renderMStaff() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const staff = await Staff.list(currentHostelId);
     tc.innerHTML = `
@@ -1403,8 +1378,8 @@ async function renderMStaff() {
           <tbody>${staff.length === 0
             ? '<tr><td colspan="7" class="empty-td">No staff records</td></tr>'
             : staff.map(s => `<tr class="${s.status!=='active'?'row-inactive':''}">
-                <td>${s.name}</td><td>${s.role}</td><td>${s.phone||'—'}</td>
-                <td>${s.salary ? 'Rs. '+_fmt(s.salary) : '—'}</td>
+                <td>${s.name}</td><td>${s.role}</td><td>${s.phone||'â€”'}</td>
+                <td>${s.salary ? 'Rs. '+_fmt(s.salary) : 'â€”'}</td>
                 <td>${_fdate(s.join_date)}</td>
                 <td><span class="badge badge-${s.status==='active'?'green':'muted'}">${s.status}</span></td>
                 <td>${s.status==='active' ? `<button class="mb mb-sm mb-red" onclick="deactivateStaff('${s.id}','${s.name.replace(/'/g,"\\'")}')">Remove</button>` : ''}</td>
@@ -1414,7 +1389,7 @@ async function renderMStaff() {
       </div>
       <div id="m-staff" class="modal-ov" style="display:none">
         <div class="modal">
-          <div class="mhdr"><h3>Add Staff Member</h3><button class="mx" onclick="closeModal('m-staff')">✕</button></div>
+          <div class="mhdr"><h3>Add Staff Member</h3><button class="mx" onclick="closeModal('m-staff')">âœ•</button></div>
           <div class="mbody">
             <div class="frow">
               <div class="fg"><label>Full Name *</label><input id="sf-name" placeholder="Ahmad Ali"></div>
@@ -1450,7 +1425,7 @@ async function saveStaff() {
   const name = document.getElementById('sf-name').value.trim();
   if (!name) { mToast('Name is required','error'); return; }
   const btn = document.getElementById('sf-save-btn');
-  btn.disabled=true; btn.textContent='Saving…';
+  btn.disabled=true; btn.textContent='Savingâ€¦';
   try {
     await Staff.create({ hostel_id: currentHostelId, name, role: document.getElementById('sf-role').value, phone: document.getElementById('sf-phone').value.trim()||null, cnic: document.getElementById('sf-cnic').value.trim()||null, salary: parseFloat(document.getElementById('sf-salary').value)||null, join_date: document.getElementById('sf-join').value||null });
     closeModal('m-staff'); mToast('Staff added','success'); renderMStaff();
@@ -1463,10 +1438,10 @@ async function deactivateStaff(id, name) {
   catch (e) { mToast(e.message,'error'); }
 }
 
-// ── VISITORS ──
+// â”€â”€ VISITORS â”€â”€
 async function renderMVisitors() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const visitors = await Visitors.list(currentHostelId);
     tc.innerHTML = `
@@ -1477,9 +1452,9 @@ async function renderMVisitors() {
           <tbody>${visitors.length === 0
             ? '<tr><td colspan="7" class="empty-td">No visitor records</td></tr>'
             : visitors.map(v => `<tr>
-                <td>${v.name}</td><td>${v.phone||'—'}</td>
-                <td>${v.tenants?.name||'—'}</td>
-                <td>${v.purpose||'—'}</td>
+                <td>${v.name}</td><td>${v.phone||'â€”'}</td>
+                <td>${v.tenants?.name||'â€”'}</td>
+                <td>${v.purpose||'â€”'}</td>
                 <td>${_fdate(v.visit_date)}</td>
                 <td><span class="badge badge-${v.status==='checked-out'?'muted':'green'}">${v.status}</span></td>
                 <td>${v.status==='checked-in' ? `<button class="mb mb-sm" onclick="checkoutVisitor('${v.id}')">Check Out</button>` : _fdate(v.checked_out_at)}</td>
@@ -1489,7 +1464,7 @@ async function renderMVisitors() {
       </div>
       <div id="m-visitor" class="modal-ov" style="display:none">
         <div class="modal">
-          <div class="mhdr"><h3>Log Visitor</h3><button class="mx" onclick="closeModal('m-visitor')">✕</button></div>
+          <div class="mhdr"><h3>Log Visitor</h3><button class="mx" onclick="closeModal('m-visitor')">âœ•</button></div>
           <div class="mbody">
             <div class="frow">
               <div class="fg"><label>Visitor Name *</label><input id="vt-name" placeholder="Visitor name"></div>
@@ -1497,11 +1472,11 @@ async function renderMVisitors() {
             </div>
             <div class="frow">
               <div class="fg"><label>CNIC</label><input id="vt-cnic" placeholder="Optional"></div>
-              <div class="fg"><label>Visiting Tenant</label><select id="vt-tenant"><option value="">Select tenant…</option></select></div>
+              <div class="fg"><label>Visiting Tenant</label><select id="vt-tenant"><option value="">Select tenantâ€¦</option></select></div>
             </div>
             <div class="frow">
               <div class="fg"><label>Visit Date *</label><input id="vt-date" type="date" value="${_today()}"></div>
-              <div class="fg"><label>Purpose</label><input id="vt-purpose" placeholder="Personal visit, delivery…"></div>
+              <div class="fg"><label>Purpose</label><input id="vt-purpose" placeholder="Personal visit, deliveryâ€¦"></div>
             </div>
           </div>
           <div class="mfoot">
@@ -1517,8 +1492,8 @@ async function openVisitorModal() {
   try {
     const tenants = await Tenants.list(currentHostelId, { status: 'active' });
     const sel = document.getElementById('vt-tenant');
-    if (sel) sel.innerHTML = '<option value="">Select tenant…</option>' +
-      tenants.map(t => `<option value="${t.id}">${t.tid} — ${t.name}</option>`).join('');
+    if (sel) sel.innerHTML = '<option value="">Select tenantâ€¦</option>' +
+      tenants.map(t => `<option value="${t.id}">${t.tid} â€” ${t.name}</option>`).join('');
   } catch (_) {}
   ['vt-name','vt-phone','vt-cnic','vt-purpose'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('vt-date').value = _today();
@@ -1529,7 +1504,7 @@ async function saveVisitor() {
   const name = document.getElementById('vt-name').value.trim();
   if (!name) { mToast('Visitor name is required','error'); return; }
   const btn = document.getElementById('vt-save-btn');
-  btn.disabled=true; btn.textContent='Saving…';
+  btn.disabled=true; btn.textContent='Savingâ€¦';
   try {
     await Visitors.create({ hostel_id: currentHostelId, name, phone: document.getElementById('vt-phone').value.trim()||null, cnic: document.getElementById('vt-cnic').value.trim()||null, tenant_id: document.getElementById('vt-tenant').value||null, visit_date: document.getElementById('vt-date').value, purpose: document.getElementById('vt-purpose').value.trim()||null, logged_by: currentUser.id });
     closeModal('m-visitor'); mToast('Visitor checked in','success'); renderMVisitors();
@@ -1541,11 +1516,11 @@ async function checkoutVisitor(id) {
   catch (e) { mToast(e.message,'error'); }
 }
 
-// ── ATTENDANCE ──
+// â”€â”€ ATTENDANCE â”€â”€
 async function renderMAttendance() {
   const tc = tabContent(); if (!tc) return;
   const date = _today();
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const [tenants, attRecords] = await Promise.all([
       Tenants.list(currentHostelId, { status: 'active' }),
@@ -1559,7 +1534,7 @@ async function renderMAttendance() {
           const s = attMap[t.id] || '';
           return `<div class="att-card att-${s||'none'}">
             <div class="att-name">${t.name}</div>
-            <div class="att-tid">${t.tid} · Room ${t.rooms?.room_number||'—'}</div>
+            <div class="att-tid">${t.tid} Â· Room ${t.rooms?.room_number||'â€”'}</div>
             <div class="att-btns">
               <button class="mb mb-sm mb-green ${s==='present'?'mb-active':''}" onclick="markAttendance('${t.id}','present','${date}',this)">Present</button>
               <button class="mb mb-sm mb-red ${s==='absent'?'mb-active':''}"   onclick="markAttendance('${t.id}','absent','${date}',this)">Absent</button>
@@ -1582,10 +1557,10 @@ async function markAttendance(personId, status, date, btn) {
   } catch (e) { mToast(e.message,'error'); }
 }
 
-// ── SETTINGS ──
+// â”€â”€ SETTINGS â”€â”€
 async function renderMSettings() {
   const tc = tabContent(); if (!tc) return;
-  tc.innerHTML = '<div class="loading">Loading…</div>';
+  tc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const [hostel, settings] = await Promise.all([
       Hostels.getById(currentHostelId),
@@ -1612,7 +1587,7 @@ async function renderMSettings() {
         <div class="settings-section">
           <h3>Portal Settings</h3>
           <div class="frow">
-            <div class="fg"><label>Banner Text</label><input id="st-banner" value="${settings?.banner_text||''}" placeholder="Special announcement…"></div>
+            <div class="fg"><label>Banner Text</label><input id="st-banner" value="${settings?.banner_text||''}" placeholder="Special announcementâ€¦"></div>
             <div class="fg"><label>Offer Tag</label><input id="st-offer" value="${settings?.offer_tag||''}" placeholder="First month 50% off"></div>
           </div>
           <div class="frow">
@@ -1623,7 +1598,7 @@ async function renderMSettings() {
         </div>
         <div class="settings-section">
           <h3>Data</h3>
-          <button class="mb" onclick="exportData()">⬇ Export All Data (JSON)</button>
+          <button class="mb" onclick="exportData()">â¬‡ Export All Data (JSON)</button>
         </div>
       </div>`;
   } catch (e) { tc.innerHTML = `<div class="error-state">${e.message}</div>`; }
@@ -1659,10 +1634,10 @@ async function exportData() {
   } catch (e) { mToast(e.message,'error'); }
 }
 
-// ─── ADMIN PORTAL ────────────────────────────────────────────
+// â”€â”€â”€ ADMIN PORTAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function renderAdmin() {
   const mc = document.getElementById('p-main-content'); if (!mc) return;
-  mc.innerHTML = '<div class="loading">Loading network overview…</div>';
+  mc.innerHTML = '<div class="loading">Loading network overviewâ€¦</div>';
   try {
     const hostels = await Hostels.listActive();
     mc.innerHTML = `
@@ -1672,10 +1647,10 @@ async function renderAdmin() {
           ${hostels.map(h => `
             <div class="admin-hostel-card">
               <div class="ahc-name">${h.name}</div>
-              <div class="ahc-area">📍 ${h.area}, ${h.city}</div>
+              <div class="ahc-area">ðŸ“ ${h.area}, ${h.city}</div>
               <div class="ahc-price">From Rs. ${_fmt(h.price_from||0)}/mo</div>
               <div class="ahc-tags">${(h.amenities||[]).slice(0,3).map(a=>`<span class="htag">${a}</span>`).join('')}</div>
-              <button class="mb mb-sm mb-gold" onclick="adminManageHostel('${h.id}')">Manage →</button>
+              <button class="mb mb-sm mb-gold" onclick="adminManageHostel('${h.id}')">Manage â†’</button>
             </div>`).join('')}
         </div>
       </div>`;
@@ -1687,7 +1662,7 @@ function adminManageHostel(hostelId) {
   renderManager('dashboard');
 }
 
-// ─── FINANCE PORTAL ──────────────────────────────────────────
+// â”€â”€â”€ FINANCE PORTAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let finTab = 'overview';
 async function renderFinance(tab) {
   finTab = tab || finTab;
@@ -1698,7 +1673,7 @@ async function renderFinance(tab) {
       <button class="stab ${finTab==='overview'?'active':''}"   onclick="renderFinance('overview')">Overview</button>
       <button class="stab ${finTab==='summary'?'active':''}"    onclick="renderFinance('summary')">Monthly Summary</button>
     </div>
-    <div id="fin-content"><div class="loading">Loading…</div></div>`;
+    <div id="fin-content"><div class="loading">Loadingâ€¦</div></div>`;
   if (finTab === 'overview')  renderFinOverview();
   if (finTab === 'summary')   renderFinSummary();
 }
@@ -1712,12 +1687,12 @@ async function renderFinOverview() {
     const expected = tenants.reduce((s,t) => s+Number(t.rent),0);
     el.innerHTML = `
       <div class="stat-grid">
-        ${statCard('Expected ('+_mlabel(_curMonth())+')', 'Rs. '+_fmt(expected), '📋', 'blue')}
-        ${statCard('Collected', 'Rs. '+_fmt(total), '💰', 'gold')}
-        ${statCard('Outstanding', 'Rs. '+_fmt(Math.max(0,expected-total)), '⚠', 'red')}
-        ${statCard('Collection Rate', expected ? Math.round((total/expected)*100)+'%' : '—', '📊', total>=expected?'green':'orange')}
+        ${statCard('Expected ('+_mlabel(_curMonth())+')', 'Rs. '+_fmt(expected), 'ðŸ“‹', 'blue')}
+        ${statCard('Collected', 'Rs. '+_fmt(total), 'ðŸ’°', 'gold')}
+        ${statCard('Outstanding', 'Rs. '+_fmt(Math.max(0,expected-total)), 'âš ', 'red')}
+        ${statCard('Collection Rate', expected ? Math.round((total/expected)*100)+'%' : 'â€”', 'ðŸ“Š', total>=expected?'green':'orange')}
       </div>
-      <h4 style="margin:1.5rem 0 .5rem">All Payments — ${_mlabel(_curMonth())}</h4>
+      <h4 style="margin:1.5rem 0 .5rem">All Payments â€” ${_mlabel(_curMonth())}</h4>
       <div class="table-wrap"><table class="data-table">
         <thead><tr><th>Tenant</th><th>Amount</th><th>Type</th><th>Method</th><th>Date</th></tr></thead>
         <tbody>${pays.map(p=>`<tr>
@@ -1751,10 +1726,10 @@ async function renderFinSummary() {
   } catch (e) { el.innerHTML = `<div class="error-state">${e.message}</div>`; }
 }
 
-// ─── HOSTELITE PORTAL ─────────────────────────────────────────
+// â”€â”€â”€ HOSTELITE PORTAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function renderHostelite() {
   const mc = document.getElementById('p-main-content'); if (!mc) return;
-  mc.innerHTML = '<div class="loading">Loading your dashboard…</div>';
+  mc.innerHTML = '<div class="loading">Loading your dashboardâ€¦</div>';
   try {
     const { data: tenantRows } = await _db.from('tenants').select('*,rooms(room_number,floor,type)').eq('profile_id', currentUser.id).limit(1);
     const tenant = tenantRows?.[0];
@@ -1766,16 +1741,16 @@ async function renderHostelite() {
     const thisMonthPaid = pays.some(p => p.month === _curMonth() && p.type === 'regular');
     mc.innerHTML = `
       <div class="hostelite-layout">
-        <h2>Welcome, ${tenant.name.split(' ')[0]} 👋</h2>
+        <h2>Welcome, ${tenant.name.split(' ')[0]} ðŸ‘‹</h2>
         <div class="stat-grid">
-          ${statCard('Monthly Rent', 'Rs. '+_fmt(tenant.rent), '💰', 'blue')}
-          ${statCard('This Month', thisMonthPaid ? 'Paid ✓' : 'Pending', '📅', thisMonthPaid ? 'green' : 'red')}
-          ${statCard('Room', tenant.rooms?.room_number || '—', '🛏', 'muted')}
-          ${statCard('Since', _fdate(tenant.move_in_date), '📆', 'muted')}
+          ${statCard('Monthly Rent', 'Rs. '+_fmt(tenant.rent), 'ðŸ’°', 'blue')}
+          ${statCard('This Month', thisMonthPaid ? 'Paid âœ“' : 'Pending', 'ðŸ“…', thisMonthPaid ? 'green' : 'red')}
+          ${statCard('Room', tenant.rooms?.room_number || 'â€”', 'ðŸ›', 'muted')}
+          ${statCard('Since', _fdate(tenant.move_in_date), 'ðŸ“†', 'muted')}
         </div>
         <div class="detail-grid" style="margin:1.5rem 0">
-          ${mFld('Tenant ID', tenant.tid)} ${mFld('CNIC', tenant.cnic||'—')}
-          ${mFld('Phone', tenant.phone)} ${mFld('Room Type', tenant.rooms?.type||'—')}
+          ${mFld('Tenant ID', tenant.tid)} ${mFld('CNIC', tenant.cnic||'â€”')}
+          ${mFld('Phone', tenant.phone)} ${mFld('Room Type', tenant.rooms?.type||'â€”')}
         </div>
         <h3>Recent Notices</h3>
         <div class="notices-list">
@@ -1793,10 +1768,10 @@ async function renderHostelite() {
   } catch (e) { mc.innerHTML = `<div class="error-state">${e.message}</div>`; }
 }
 
-// ─── STAFF PORTAL ─────────────────────────────────────────────
+// â”€â”€â”€ STAFF PORTAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function renderStaff() {
   const mc = document.getElementById('p-main-content'); if (!mc) return;
-  mc.innerHTML = '<div class="loading">Loading…</div>';
+  mc.innerHTML = '<div class="loading">Loadingâ€¦</div>';
   try {
     const { data: staffRows } = await _db.from('staff').select('*').eq('profile_id', currentUser.id).limit(1);
     const s = staffRows?.[0];
@@ -1805,17 +1780,17 @@ async function renderStaff() {
     const att = todayAtt.find(a => a.person_id === s.id);
     mc.innerHTML = `
       <div class="hostelite-layout">
-        <h2>Staff Portal — ${s.name}</h2>
+        <h2>Staff Portal â€” ${s.name}</h2>
         <div class="stat-grid">
-          ${statCard('Role', s.role, '👤', 'blue')}
-          ${statCard('Salary', s.salary ? 'Rs. '+_fmt(s.salary) : '—', '💰', 'muted')}
-          ${statCard('Joined', _fdate(s.join_date), '📅', 'muted')}
-          ${statCard('Status', s.status, '✓', s.status==='active'?'green':'red')}
+          ${statCard('Role', s.role, 'ðŸ‘¤', 'blue')}
+          ${statCard('Salary', s.salary ? 'Rs. '+_fmt(s.salary) : 'â€”', 'ðŸ’°', 'muted')}
+          ${statCard('Joined', _fdate(s.join_date), 'ðŸ“…', 'muted')}
+          ${statCard('Status', s.status, 'âœ“', s.status==='active'?'green':'red')}
         </div>
         <div class="widget" style="margin-top:1.5rem">
-          <div class="widget-title">Today's Attendance — ${_fdate(_today())}</div>
+          <div class="widget-title">Today's Attendance â€” ${_fdate(_today())}</div>
           ${att
-            ? `<div>Clock In: <strong>${att.clock_in||'—'}</strong> &nbsp; Clock Out: <strong>${att.clock_out||'—'}</strong></div>`
+            ? `<div>Clock In: <strong>${att.clock_in||'â€”'}</strong> &nbsp; Clock Out: <strong>${att.clock_out||'â€”'}</strong></div>`
             : '<div class="widget-empty">Not clocked in today</div>'}
         </div>
       </div>`;

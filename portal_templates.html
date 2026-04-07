@@ -1,277 +1,10 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="white">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lahore Boys Hostels — Find Your Perfect Hostel in Lahore</title>
-<meta name="description" content="Discover verified boys hostels in Lahore. Compare prices, amenities and locations. Apply online.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-
-<!-- ══ DYNAMIC BACKGROUND ══ -->
-<div class="dynamic-bg">
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
-  <div class="bg-orb orb-3"></div>
-</div>
-
-<!-- ══ NAV ══ -->
-<nav>
-  <div class="nav-logo" onclick="showPage('home');window.scrollTo(0,0)">Lahore<span>Boys</span>Hostels</div>
-  <ul class="nav-links">
-    <li><a onclick="showPage('home');smoothScroll('#hostels')">Hostels</a></li>
-    <li><a onclick="showPage('home');smoothScroll('#how')">How It Works</a></li>
-    <li><a onclick="openPortal()" class="nav-portal">Portal Login</a></li>
-    <li><a onclick="showPage('home');smoothScroll('#hostels')" class="nav-cta">Find Rooms</a></li>
-  </ul>
-  <div class="nav-right">
-    <!-- 5-Theme Picker -->
-    <div class="theme-picker" title="Switch theme">
-      <div class="tp-dot tp-midnight-blue active" data-theme="midnight-blue" onclick="setTheme('midnight-blue')" title="Midnight Blue"></div>
-      <div class="tp-dot tp-midnight-purple" data-theme="midnight-purple" onclick="setTheme('midnight-purple')" title="Midnight Purple"></div>
-      <div class="tp-dot tp-charcoal" data-theme="charcoal" onclick="setTheme('charcoal')" title="Charcoal Gray"></div>
-      <div class="tp-dot tp-honey" data-theme="honey" onclick="setTheme('honey')" title="Golden Honey"></div>
-      <div class="tp-dot tp-teal" data-theme="teal" onclick="setTheme('teal')" title="Teal Blue"></div>
-    </div>
-    <button id="nav-portal-close" onclick="closePortal()">✕ Exit Portal</button>
-  </div>
-</nav>
-
-<!-- ══ PUBLIC HOME PAGE ══ -->
-<div id="page-home" class="page active">
-
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-inner">
-      <div class="hero-tag">🏙️ Lahore's #1 Boys Hostel Network</div>
-      <h1>Find Your<br><em>Perfect</em> Hostel<br>in Lahore</h1>
-      <p class="hero-sub">Compare verified boys hostels across Lahore. Transparent pricing, real amenities, trusted management.</p>
-      <div class="hero-search">
-        <input type="text" id="hero-search-input" placeholder="Search by area, name or budget…" oninput="filterHostels()">
-        <select id="hero-area" onchange="document.getElementById('fsel-area').value=this.value;filterHostels()">
-          <option value="all">All Areas</option>
-          <option value="Nasir Colony">Nasir Colony</option>
-          <option value="Johar Town">Johar Town</option>
-          <option value="Gulberg III">Gulberg</option>
-          <option value="Iqbal Town">Iqbal Town</option>
-          <option value="Garden Town">Garden Town</option>
-          <option value="DHA Phase 5">DHA</option>
-          <option value="Faisal Town">Faisal Town</option>
-          <option value="Wapda Town">Wapda Town</option>
-          <option value="Bahria Town">Bahria Town</option>
-          <option value="Township">Township</option>
-        </select>
-        <button onclick="filterHostels()">Search →</button>
-      </div>
-      <div class="hero-stats">
-        <div><div class="hstat-num" id="stat-hostels">—</div><div class="hstat-lbl">Verified Hostels</div></div>
-        <div><div class="hstat-num" id="stat-beds">—</div><div class="hstat-lbl">Beds Available</div></div>
-        <div><div class="hstat-num" id="stat-price">—</div><div class="hstat-lbl">Starting From</div></div>
-        <div><div class="hstat-num">100%</div><div class="hstat-lbl">Verified Owners</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Hostel Listings -->
-  <section id="hostels">
-    <div class="stag">Our Network</div>
-    <div class="stitle">Browse Verified Hostels</div>
-    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem">All listings are personally verified. Prices shown are per person per month.</p>
-
-    <div class="filters-bar">
-      <span class="fl">Filter:</span>
-      <button class="fb active" id="fb-all"     onclick="setF('all')">All</button>
-      <button class="fb"        id="fb-student"  onclick="setF('student')">Students</button>
-      <button class="fb"        id="fb-pro"      onclick="setF('pro')">Professionals</button>
-      <button class="fb"        id="fb-meals"    onclick="setF('meals')">Meals Included</button>
-      <button class="fb"        id="fb-wifi"     onclick="setF('wifi')">WiFi</button>
-      <select class="fsel" id="fsel-area" onchange="filterHostels()">
-        <option value="all">All Areas</option>
-        <option value="Nasir Colony">Nasir Colony</option>
-        <option value="Johar Town">Johar Town</option>
-        <option value="Gulberg III">Gulberg</option>
-        <option value="Iqbal Town">Iqbal Town</option>
-        <option value="Garden Town">Garden Town</option>
-        <option value="DHA Phase 5">DHA Phase 5</option>
-        <option value="Faisal Town">Faisal Town</option>
-        <option value="Wapda Town">Wapda Town</option>
-        <option value="Bahria Town">Bahria Town</option>
-        <option value="Cavalry Ground">Cavalry Ground</option>
-        <option value="Township">Township</option>
-        <option value="Shadman Colony">Shadman Colony</option>
-      </select>
-      <select class="fsel" id="fsel-sort" onchange="filterHostels()">
-        <option value="default">Sort: Default</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
-        <option value="rating">Rating</option>
-      </select>
-      <span class="rc" id="result-count"></span>
-      <!-- Inline compare bar -->
-      <div class="compare-inline" id="inline-compare-bar">
-        <span class="compare-inline-label">▶ Compare:</span>
-        <div class="compare-inline-slots" id="inline-compare-slots"></div>
-        <button class="compare-inline-go" onclick="openCompare()">Compare Now</button>
-        <button class="compare-inline-clr" onclick="clearCompare()">✕</button>
-      </div>
-      <div class="view-toggle">
-        <button class="vt-btn active" id="vt-grid" onclick="setViewMode('grid')" title="Grid view">⊞</button>
-        <button class="vt-btn"        id="vt-list" onclick="setViewMode('list')" title="List view">☰</button>
-      </div>
-    </div>
-
-    <div class="hgrid" id="hgrid"></div>
-  </section>
-
-  <!-- How It Works -->
-  <section id="how">
-    <div class="stag">Simple Process</div>
-    <div class="stitle">How It Works</div>
-    <div class="steps-grid">
-      <div class="sitem">
-        <div class="snum">1</div>
-        <div class="stitl">Browse</div>
-        <div class="sdesc">Explore verified hostels with transparent pricing and real photos.</div>
-      </div>
-      <div class="sitem">
-        <div class="snum">2</div>
-        <div class="stitl">Compare</div>
-        <div class="sdesc">Select up to 3 hostels and compare them side by side.</div>
-      </div>
-      <div class="sitem">
-        <div class="snum">3</div>
-        <div class="stitl">Apply</div>
-        <div class="sdesc">Fill in a quick form and we'll connect you with the manager.</div>
-      </div>
-      <div class="sitem">
-        <div class="snum">4</div>
-        <div class="stitl">Move In</div>
-        <div class="sdesc">Confirm your room and move in at your preferred date.</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="ftop">
-      <div>
-        <div class="fbrand">Lahore<span>Boys</span>Hostels</div>
-        <p class="fdesc">Lahore's most trusted boys hostel directory. Connecting students and professionals with verified accommodation.</p>
-      </div>
-      <div class="fcol">
-        <h4>Hostels</h4>
-        <a onclick="showPage('home');smoothScroll('#hostels')">Browse All</a>
-        <a onclick="setF('student');filterHostels()">For Students</a>
-        <a onclick="setF('pro');filterHostels()">For Professionals</a>
-        <a onclick="setF('meals');filterHostels()">With Meals</a>
-      </div>
-      <div class="fcol">
-        <h4>Platform</h4>
-        <a onclick="openPortal()">Manager Portal</a>
-        <a onclick="openPortal()">Tenant Login</a>
-        <a onclick="openPortal()">Finance Portal</a>
-        <a onclick="openPortal()">Admin Access</a>
-      </div>
-    </div>
-    <div class="fbot">
-      <span>© 2025 Lahore Boys Hostels. All rights reserved.</span>
-      <span>Made for Lahore 🏙️</span>
-    </div>
-  </footer>
-
-  <!-- Compare bar (fixed bottom) -->
-  <div id="compare-bar">
-    <div class="cslots" id="cmp-slots">
-      <div class="cslot empty">+ Add hostel</div>
-      <div class="cslot empty">+ Add hostel</div>
-      <div class="cslot empty">+ Add hostel</div>
-    </div>
-    <div style="display:flex;gap:.5rem">
-      <button class="btn-cgo" onclick="openCompare()">Compare →</button>
-      <button class="btn-clr" onclick="clearCompare()">Clear</button>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div id="toast-c" class="toast-c"></div>
-
-  <!-- Apply Modal -->
-  <div id="m-apply" class="modal-ov">
-    <div class="modal">
-      <div class="mhdr">
-        <div>
-          <h3 id="m-apply-title">Apply for a Room</h3>
-          <p>Submit your details and we'll contact you within 24 hours</p>
-        </div>
-        <button class="mx" onclick="closeModal('m-apply')">✕</button>
-      </div>
-      <div id="m-apply-body">
-        <div class="mbody">
-          <div class="frow">
-            <div class="fg"><label>Full Name *</label><input id="ap-name" placeholder="Muhammad Ali"></div>
-            <div class="fg"><label>Phone *</label><input id="ap-phone" placeholder="+92 300…"></div>
-          </div>
-          <div class="frow full">
-            <div class="fg"><label>Room Type</label>
-              <select id="ap-room">
-                <option>Sharing Room</option>
-                <option>Private Room</option>
-                <option>Any Available</option>
-              </select>
-            </div>
-          </div>
-          <div class="frow full">
-            <div class="fg"><label>Message (optional)</label><textarea id="ap-msg" placeholder="Move-in date, preferences…"></textarea></div>
-          </div>
-        </div>
-        <div class="mfoot">
-          <button class="bcancel" onclick="closeModal('m-apply')">Cancel</button>
-          <button class="bsubmit" onclick="submitApply()">Submit Application</button>
-        </div>
-      </div>
-      <div id="m-apply-success" style="display:none">
-        <div class="success-state">
-          <div class="s-icon">✅</div>
-          <div class="s-title">Application Submitted!</div>
-          <p class="s-sub">Your application has been received. The hostel manager will contact you within 24 hours via WhatsApp or phone.</p>
-          <div class="mfoot"><button class="bsubmit" onclick="closeModal('m-apply')">Close</button></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Compare Modal -->
-  <div id="m-compare" class="modal-ov">
-    <div class="modal cmp-modal">
-      <div class="mhdr">
-        <div><h3>Hostel Comparison</h3><p>Side-by-side comparison of selected hostels</p></div>
-        <button class="mx" onclick="closeModal('m-compare')">✕</button>
-      </div>
-      <div id="m-cmp-body" class="mbody"></div>
-      <div class="mfoot">
-        <button class="bcancel" onclick="closeModal('m-compare')">Close</button>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /page-home -->
-
-<!-- ══ HOSTEL DETAIL PAGE ══ -->
-<div id="page-hostel" class="page"></div>
-
-<!-- ══ PORTAL PAGE ══ -->
-<!-- â•â• PORTAL â•â• -->
+﻿<!-- â•â• PORTAL â•â• -->
 <div id="page-portal" style="display:none;padding-top:64px">
 
 <!-- LOGIN -->
-<div id="portal-login" style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 64px);background:transparent;padding:20px">
+<div id="portal-login" style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 64px);background:#060A10;padding:20px">
 <div style="width:100%;max-width:420px">
-  <div style="text-align:center;margin-bottom:2rem"><div style="font-family:var(--serif);font-size:1.6rem;font-weight:700;color:var(--text)">Lahore<span style="color:var(--accent)">Boys</span>Hostels</div><p style="color:var(--text2);font-size:.82rem;margin-top:.3rem">Portal Login</p></div>
+  <div style="text-align:center;margin-bottom:2rem"><div style="font-family:var(--serif);font-size:1.6rem;font-weight:700;color:#E8EDF5">Lahore<span style="color:#E8B84B">Boys</span>Hostels</div><p style="color:#6B7A99;font-size:.82rem;margin-top:.3rem">Portal Login</p></div>
   <div class="l-tabs" style="grid-template-columns:repeat(5,1fr)">
     <button class="l-tab active" data-role="manager" onclick="setLoginRole('manager')">Manager</button>
     <button class="l-tab" data-role="hostelite" onclick="setLoginRole('hostelite')">Hostelite</button>
@@ -279,23 +12,23 @@
     <button class="l-tab" data-role="finance" onclick="setLoginRole('finance')">Finance</button>
     <button class="l-tab" data-role="admin" onclick="setLoginRole('admin')">Admin</button>
   </div>
-  <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:24px;margin-top:1rem">
-    <p id="l-hint" style="font-size:.78rem;color:var(--text2);margin-bottom:14px">Manager login</p>
+  <div style="background:#161B26;border:1px solid #2A3347;border-radius:10px;padding:24px;margin-top:1rem">
+    <p id="l-hint" style="font-size:.78rem;color:#6B7A99;margin-bottom:14px">Manager login</p>
     <div class="mfg" style="margin-bottom:12px"><label class="mfl">Username</label><input class="mfi" id="l-user" placeholder="username" autocomplete="username"/></div>
     <div class="mfg" style="margin-bottom:14px"><label class="mfl">Password</label><input class="mfi" id="l-pass" type="password" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="current-password"/></div>
     <div id="l-err" style="display:none;background:rgba(255,92,92,.1);border:1px solid rgba(255,92,92,.25);color:#FF5C5C;padding:8px 12px;border-radius:6px;font-size:.82rem;margin-bottom:12px"></div>
     <button class="btn btn-gold" style="width:100%;justify-content:center;padding:11px" onclick="doLogin()">Login &rarr;</button>
-    <div id="l-demo" style="margin-top:14px;font-size:.75rem;color:var(--text2);text-align:center">Demo: <code style="color:var(--accent);background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px">manager.ar</code> / <code style="color:var(--accent);background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px">ar2024</code></div>
+    <div id="l-demo" style="margin-top:14px;font-size:.75rem;color:#6B7A99;text-align:center">Demo: <code style="color:#E8A84B;background:#1E2636;padding:1px 5px;border-radius:3px">manager.ar</code> / <code style="color:#E8A84B;background:#1E2636;padding:1px 5px;border-radius:3px">ar2024</code></div>
   </div>
 </div></div>
 
 <!-- â•â• ADMIN PORTAL â•â• -->
-<div id="portal-admin" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:transparent">
+<div id="portal-admin" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:#0E1117">
 <div class="p-topbar">
-  <div style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;color:var(--text)">Admin Portal</span><span style="font-size:.78rem;color:var(--text2)">Platform Overview</span></div>
+  <div style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;color:#E8EDF5">Admin Portal</span><span style="font-size:.78rem;color:#6B7A99">Platform Overview</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <button class="btn btn-out btn-sm" onclick="exportAllData()">Backup</button>
-    
+    <button class="theme-toggle" onclick="toggleTheme()" style="color:#6B7A99">&#9790;</button>
     <button class="btn btn-red btn-sm" onclick="logout()">Logout</button>
   </div>
 </div>
@@ -318,14 +51,14 @@
 </div></div>
 
 <!-- â•â• MANAGER PORTAL â•â• -->
-<div id="portal-manager" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:transparent">
+<div id="portal-manager" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:#0E1117">
 <div class="p-topbar">
-  <div style="display:flex;align-items:center;gap:10px"><span id="m-hname" style="font-weight:700;color:var(--text)">Hostel</span><span id="m-uname" style="font-size:.78rem;color:var(--text2)"></span></div>
+  <div style="display:flex;align-items:center;gap:10px"><span id="m-hname" style="font-weight:700;color:#E8EDF5">Hostel</span><span id="m-uname" style="font-size:.78rem;color:#6B7A99"></span></div>
   <div style="display:flex;gap:6px;align-items:center;overflow-x:auto">
     <div class="gsearch-wrap"><span class="gsearch-icon">&#128270;</span><input class="gsearch" placeholder="Search tenants, issues..." oninput="globalSearch(this.value.toLowerCase())"/><div class="gsearch-results" id="gsearch-results"></div></div>
     <button class="notif-bell" id="notif-bell" onclick="toggleNotifPanel()">&#128276;<span class="notif-count" style="display:none">0</span></button>
     <div class="notif-panel" id="notif-panel"></div>
-    
+    <button class="theme-toggle" onclick="toggleTheme()" style="color:#6B7A99">&#9790;</button>
     <button class="btn btn-red btn-sm" onclick="logout()">Logout</button>
   </div>
 </div>
@@ -374,7 +107,7 @@
 
   <!-- Rooms -->
   <div id="mp-rooms" style="display:none">
-    <div class="sec-header"><div class="sec-title">Room Map</div><div id="mr-sum" style="font-size:.82rem;color:var(--text2)"></div></div>
+    <div class="sec-header"><div class="sec-title">Room Map</div><div id="mr-sum" style="font-size:.82rem;color:#6B7A99"></div></div>
     <div id="mr-grid" class="rooms-grid"></div>
   </div>
 
@@ -383,7 +116,7 @@
     <div class="sec-header"><div class="sec-title">Payments</div><div style="display:flex;gap:8px"><select class="fi" id="mp-msel" onchange="renderMPayments()"></select><select class="fi" id="mp-typf" onchange="renderMPayments()"><option value="">All Types</option><option value="regular">Regular</option><option value="advance">Advance</option><option value="partial">Partial</option><option value="security">Security</option><option value="overpayment">Overpayment</option></select><button class="btn btn-gold" onclick="mOpenPayModal()">+ Record Payment</button></div></div>
     <div class="ptabs"><button class="ptab active" id="pt-monthly" onclick="switchPTab('monthly')">Monthly</button><button class="ptab" id="pt-ledger" onclick="switchPTab('ledger')">Tenant Ledger</button><button class="ptab" id="pt-advances" onclick="switchPTab('advances')">Advances &amp; Special</button><button class="ptab" id="pt-allpay" onclick="switchPTab('allpay')">All Payments</button></div>
     <div id="pp-monthly">
-      <div style="margin-bottom:12px"><div id="mp-mlbl" style="font-weight:600;color:var(--text)"></div><div class="paid-bar" style="margin:6px 0"><div class="paid-fill" id="mp-bar" style="width:0%"></div></div><div id="mp-prog" style="font-size:.78rem;color:var(--text2)"></div></div>
+      <div style="margin-bottom:12px"><div id="mp-mlbl" style="font-weight:600;color:#E8EDF5"></div><div class="paid-bar" style="margin:6px 0"><div class="paid-fill" id="mp-bar" style="width:0%"></div></div><div id="mp-prog" style="font-size:.78rem;color:#6B7A99"></div></div>
       <div class="tw"><table><thead><tr><th>Tenant</th><th>Room</th><th>Type</th><th>Month</th><th>Amount</th><th>Paid</th><th>Method</th><th>Notes</th><th></th></tr></thead><tbody id="mp-tbody"></tbody></table></div>
     </div>
     <div id="pp-ledger" style="display:none"><div style="margin-bottom:12px"><select class="fi" id="ml-sel" onchange="renderMLedger()"></select></div><div id="ml-content"></div></div>
@@ -506,16 +239,16 @@
 </div></div>
 
 <!-- â•â• HOSTELITE PORTAL â•â• -->
-<div id="portal-hostelite" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:transparent">
-<div class="p-topbar" style="background:var(--surface);backdrop-filter:var(--glass-blur);border-color:var(--border)">
-  <div style="display:flex;align-items:center;gap:10px"><span id="ht-hname" style="font-weight:700;color:var(--text)"></span><span id="ht-tid-nav" class="m-tid"></span></div>
+<div id="portal-hostelite" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:#060A10">
+<div class="p-topbar" style="background:#0A0F1A;border-color:#1A2236">
+  <div style="display:flex;align-items:center;gap:10px"><span id="ht-hname" style="font-weight:700;color:#E8EDF5"></span><span id="ht-tid-nav" class="m-tid"></span></div>
   <div style="display:flex;gap:6px;align-items:center">
-    
+    <button class="theme-toggle" onclick="toggleTheme()" style="color:#6B7A99">&#9790;</button>
     <button class="btn btn-red btn-sm" onclick="logout()">Logout</button>
   </div>
 </div>
 <div class="p-content" style="max-width:900px">
-  <div style="margin-bottom:16px"><div id="ht-welcome" style="font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--text)"></div><div id="ht-sub" style="color:var(--text2);font-size:.82rem;margin-top:4px"></div></div>
+  <div style="margin-bottom:16px"><div id="ht-welcome" style="font-family:var(--serif);font-size:1.5rem;font-weight:700;color:#E8EDF5"></div><div id="ht-sub" style="color:#6B7A99;font-size:.82rem;margin-top:4px"></div></div>
   <!-- Tabs -->
   <div style="display:flex;gap:3px;margin-bottom:18px;border-bottom:1px solid #1A2236;overflow-x:auto">
     <button class="httab active" data-tab="overview" onclick="htSwitchTab('overview')">Overview</button>
@@ -536,31 +269,31 @@
       <div class="ht-stat" style="--ha:var(--p-orange)"><div class="mstat-l" id="ht-bal-lbl">Balance</div><div id="ht-bal-stat" class="mstat-v"></div></div>
     </div>
     <div class="dash-grid">
-      <div class="dc" style="background:var(--surface);backdrop-filter:var(--glass-blur);border-color:var(--border)"><div class="dc-title" style="border-color:var(--border)">Profile</div><div id="ht-profile"></div></div>
-      <div class="dc" style="background:var(--surface);backdrop-filter:var(--glass-blur);border-color:var(--border)"><div class="dc-title" style="border-color:var(--border)">Notices</div><div id="ht-notices-prev"></div></div>
+      <div class="dc" style="background:#0A0F1A;border-color:#1A2236"><div class="dc-title" style="border-color:#1A2236">Profile</div><div id="ht-profile"></div></div>
+      <div class="dc" style="background:#0A0F1A;border-color:#1A2236"><div class="dc-title" style="border-color:#1A2236">Notices</div><div id="ht-notices-prev"></div></div>
     </div>
     <div id="ht-meal-menu" style="margin-top:12px"></div>
-    <div style="margin-top:12px;background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1A2236">My Documents on File</div><div id="ht-my-docs"></div></div>
-    <div style="margin-top:12px;background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1A2236">Emergency Contacts</div><div id="ht-emergency"></div></div>
+    <div style="margin-top:12px;background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:14px 16px"><div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1A2236">My Documents on File</div><div id="ht-my-docs"></div></div>
+    <div style="margin-top:12px;background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:14px 16px"><div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1A2236">Emergency Contacts</div><div id="ht-emergency"></div></div>
   </div>
   <!-- Payments -->
   <div class="ht-panel" data-panel="payments" style="display:none">
-    <div class="sec-header"><div class="sec-title" style="color:var(--text)">Payment History</div><span id="ht-pay-total" style="font-size:.82rem;color:var(--text2)"></span></div>
-    <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:12px 14px"><div id="ht-pay-hist"></div></div>
+    <div class="sec-header"><div class="sec-title" style="color:#E8EDF5">Payment History</div><span id="ht-pay-total" style="font-size:.82rem;color:#6B7A99"></span></div>
+    <div style="background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:12px 14px"><div id="ht-pay-hist"></div></div>
   </div>
   <!-- Room -->
   <div class="ht-panel" data-panel="room" style="display:none">
-    <div class="sec-header"><div class="sec-title" style="color:var(--text)">My Room</div></div>
-    <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div id="ht-room-detail"></div></div>
-    <div style="margin-top:12px;background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1A2236">Roommates</div><div id="ht-roommates"></div></div>
+    <div class="sec-header"><div class="sec-title" style="color:#E8EDF5">My Room</div></div>
+    <div style="background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:14px 16px"><div id="ht-room-detail"></div></div>
+    <div style="margin-top:12px;background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:14px 16px"><div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6B7A99;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #1A2236">Roommates</div><div id="ht-roommates"></div></div>
   </div>
   <!-- Notices -->
   <div class="ht-panel" data-panel="notices" style="display:none"><div id="ht-notices-full"></div></div>
   <!-- Complaints -->
   <div class="ht-panel" data-panel="complaints" style="display:none">
-    <div style="margin-bottom:16px;background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:14px 16px"><div style="font-weight:600;color:var(--text);margin-bottom:10px">My Complaints</div><div id="ht-my-complaints"></div></div>
-    <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-      <div style="font-weight:600;color:var(--text);margin-bottom:12px">Submit New Complaint</div>
+    <div style="margin-bottom:16px;background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:14px 16px"><div style="font-weight:600;color:#E8EDF5;margin-bottom:10px">My Complaints</div><div id="ht-my-complaints"></div></div>
+    <div style="background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:14px 16px">
+      <div style="font-weight:600;color:#E8EDF5;margin-bottom:12px">Submit New Complaint</div>
       <div class="mfr"><div class="mfg"><label class="mfl">Title *</label><input class="mfi" id="ht-comp-title" placeholder="e.g. AC not working"/></div><div class="mfg"><label class="mfl">Category</label><select class="mfi" id="ht-comp-cat"><option>Plumbing</option><option>Electrical</option><option>Structural</option><option>Cleaning</option><option>Noise</option><option>Other</option></select></div></div>
       <div class="mfr"><div class="mfg"><label class="mfl">Priority</label><select class="mfi" id="ht-comp-pri"><option value="normal">Normal</option><option value="high">High</option></select></div></div>
       <div class="mfg" style="margin-bottom:12px"><label class="mfl">Description *</label><textarea class="mfi" id="ht-comp-desc" placeholder="Describe the issue in detail"></textarea></div>
@@ -571,15 +304,15 @@
   <!-- Requests -->
   <div class="ht-panel" data-panel="requests" style="display:none">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:18px 16px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">&#128682;</div><div style="font-weight:600;color:var(--text);margin-bottom:4px">Move-Out Request</div><div style="font-size:.78rem;color:var(--text2);margin-bottom:12px">5-day minimum notice required</div><button class="btn btn-out" onclick="htRequestMoveOut()">Request Move-Out</button></div>
-      <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:18px 16px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">&#128259;</div><div style="font-weight:600;color:var(--text);margin-bottom:4px">Room Swap Request</div><div style="font-size:.78rem;color:var(--text2);margin-bottom:12px">Subject to manager approval</div><button class="btn btn-out" onclick="htRequestRoomSwap()">Request Swap</button></div>
-      <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:18px 16px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">&#129333;</div><div style="font-weight:600;color:var(--text);margin-bottom:4px">Guest Visit Request</div><div style="font-size:.78rem;color:var(--text2);margin-bottom:12px">Physical meeting with management required. Payment may apply.</div><button class="btn btn-out" onclick="htRequestGuest()">Request Guest</button></div>
+      <div style="background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:18px 16px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">&#128682;</div><div style="font-weight:600;color:#E8EDF5;margin-bottom:4px">Move-Out Request</div><div style="font-size:.78rem;color:#6B7A99;margin-bottom:12px">5-day minimum notice required</div><button class="btn btn-out" onclick="htRequestMoveOut()">Request Move-Out</button></div>
+      <div style="background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:18px 16px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">&#128259;</div><div style="font-weight:600;color:#E8EDF5;margin-bottom:4px">Room Swap Request</div><div style="font-size:.78rem;color:#6B7A99;margin-bottom:12px">Subject to manager approval</div><button class="btn btn-out" onclick="htRequestRoomSwap()">Request Swap</button></div>
+      <div style="background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:18px 16px;text-align:center"><div style="font-size:1.5rem;margin-bottom:6px">&#129333;</div><div style="font-weight:600;color:#E8EDF5;margin-bottom:4px">Guest Visit Request</div><div style="font-size:.78rem;color:#6B7A99;margin-bottom:12px">Physical meeting with management required. Payment may apply.</div><button class="btn btn-out" onclick="htRequestGuest()">Request Guest</button></div>
     </div>
   </div>
   <!-- Feedback -->
   <div class="ht-panel" data-panel="feedback" style="display:none">
-    <div style="background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--border);border-radius:10px;padding:18px 16px">
-      <div style="font-weight:600;color:var(--text);margin-bottom:12px">Anonymous Monthly Feedback</div>
+    <div style="background:#0A0F1A;border:1px solid #1A2236;border-radius:10px;padding:18px 16px">
+      <div style="font-weight:600;color:#E8EDF5;margin-bottom:12px">Anonymous Monthly Feedback</div>
       <div class="mfr"><div class="mfg"><label class="mfl">Cleanliness (1-5) *</label><input class="mfi" id="ht-fb-clean" type="number" min="1" max="5" placeholder="1-5"/></div><div class="mfg"><label class="mfl">Food Quality (1-5)</label><input class="mfi" id="ht-fb-food" type="number" min="1" max="5" placeholder="1-5 (if meals)"/></div></div>
       <div class="mfr"><div class="mfg"><label class="mfl">Management (1-5) *</label><input class="mfi" id="ht-fb-mgmt" type="number" min="1" max="5" placeholder="1-5"/></div></div>
       <button class="btn btn-gold" onclick="htSubmitFeedback()">Submit Anonymously</button>
@@ -589,10 +322,10 @@
 </div></div>
 
 <!-- â•â• STAFF PORTAL â•â• -->
-<div id="portal-staff" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:transparent">
+<div id="portal-staff" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:#0E1117">
 <div class="p-topbar">
-  <div style="display:flex;align-items:center;gap:10px"><span id="sp-hname" style="font-weight:700;color:var(--text)"></span><span id="sp-uname" style="font-size:.78rem;color:var(--text2)"></span></div>
-  <div style="display:flex;gap:6px"><button class="btn btn-red btn-sm" onclick="logout()">Logout</button></div>
+  <div style="display:flex;align-items:center;gap:10px"><span id="sp-hname" style="font-weight:700;color:#E8EDF5"></span><span id="sp-uname" style="font-size:.78rem;color:#6B7A99"></span></div>
+  <div style="display:flex;gap:6px"><button class="theme-toggle" onclick="toggleTheme()" style="color:#6B7A99">&#9790;</button><button class="btn btn-red btn-sm" onclick="logout()">Logout</button></div>
 </div>
 <div class="p-content" style="max-width:1000px">
   <div id="sp-stats" class="m-stats" style="grid-template-columns:repeat(3,1fr)"></div>
@@ -610,12 +343,12 @@
 </div></div>
 
 <!-- â•â• FINANCE PORTAL â•â• -->
-<div id="portal-finance" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:transparent">
+<div id="portal-finance" style="display:none;flex-direction:column;min-height:calc(100vh - 64px);background:#0E1117">
 <div class="p-topbar">
-  <div style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;color:var(--text)">Finance Portal</span><span style="font-size:.78rem;color:var(--text2)">Cross-Hostel Analytics</span></div>
+  <div style="display:flex;align-items:center;gap:10px"><span style="font-weight:700;color:#E8EDF5">Finance Portal</span><span style="font-size:.78rem;color:#6B7A99">Cross-Hostel Analytics</span></div>
   <div style="display:flex;gap:6px;align-items:center">
     <button class="btn btn-out btn-sm" onclick="exportAllData()">Backup</button>
-    
+    <button class="theme-toggle" onclick="toggleTheme()" style="color:#6B7A99">&#9790;</button>
     <button class="btn btn-red btn-sm" onclick="logout()">Logout</button>
   </div>
 </div>
@@ -860,11 +593,3 @@
   <div class="mfg"><label class="mfl">Features (comma separated)</label><input class="mfi" id="mm-wr-feats" placeholder="e.g. Bathroom, WiFi, AC, Bills included"/></div>
 </div><div class="mm-foot"><button class="btn btn-out" onclick="closeMM('add-web-room')">Cancel</button><button class="btn btn-gold" onclick="mSaveWebRoom()">Save Room Type</button></div></div></div>
 
-
-
-<!-- Load order: config → supabase client → app logic -->
-<script src="config.js"></script>
-<script src="supabase-client.js"></script>
-<script src="offline_engine.js"></script>`r`n<script src="script.js"></script>
-</body>
-</html>
