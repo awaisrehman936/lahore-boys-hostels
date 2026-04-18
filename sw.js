@@ -3,15 +3,16 @@
  * Cache-first for static assets, network-first for API/Supabase calls.
  */
 
-const CACHE_NAME = 'lbh-v1';
+const CACHE_NAME = 'lbh-v2';
 
 // Static assets to pre-cache on install
 const PRECACHE = [
   '/',
   '/index.html',
   '/styles.css',
+  '/config.js',
+  '/supabase-client.js',
   '/script.js',
-  '/offline_engine.js',
   '/manifest.json',
 ];
 

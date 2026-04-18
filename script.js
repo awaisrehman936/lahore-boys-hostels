@@ -33,10 +33,10 @@ function initObserver() {
 }
 
 // â”€â”€â”€ THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const THEMES = ['white','midnight-blue','charcoal'];
+const THEMES = ['charcoal-grey','off-white','golden-honey'];
 
 function setTheme(t) {
-  if (!THEMES.includes(t)) t = 'white';
+  if (!THEMES.includes(t)) t = 'charcoal-grey';
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('lbh_theme', t);
   document.querySelectorAll('.tp-dot').forEach(d => {
@@ -45,7 +45,7 @@ function setTheme(t) {
 }
 
 function loadTheme() {
-  const t = localStorage.getItem('lbh_theme') || 'white';
+  const t = localStorage.getItem('lbh_theme') || 'charcoal-grey';
   setTheme(t);
 }
 
